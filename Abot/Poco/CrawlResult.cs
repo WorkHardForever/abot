@@ -2,42 +2,49 @@
 
 namespace Abot.Poco
 {
-    [Serializable]
-    public class CrawlResult
-    {
-        public CrawlResult()
-        {
-        }
+	/// <summary>
+	/// Contain all info about crawled operations
+	/// </summary>
+	[Serializable]
+	public class CrawlResult
+	{
+		#region Ctor
 
-        /// <summary>
-        /// The root of the crawl
-        /// </summary>
-        public Uri RootUri { get; set; }
+		/// <summary>
+		/// Do nothing. Requared for serialization
+		/// </summary>
+		public CrawlResult() { }
 
-        /// <summary>
-        /// The amount of time that elapsed before the crawl completed
-        /// </summary>
-        public TimeSpan Elapsed { get; set; }
+		#endregion
 
-        /// <summary>
-        /// Whether or not an error occurred during the crawl that caused it to end prematurely
-        /// </summary>
-        public bool ErrorOccurred 
-        {
-            get
-            {
-                return (ErrorException != null);
-            }
-        }
+		#region Public Variables
 
-        /// <summary>
-        /// The exception that caused the crawl to end prematurely
-        /// </summary>
-        public Exception ErrorException { get; set; }
+		/// <summary>
+		/// The root of the crawl
+		/// </summary>
+		public Uri RootUri { get; set; }
 
-        /// <summary>
-        /// The context of the crawl
-        /// </summary>
-        public CrawlContext CrawlContext { get; set; }
-    }
+		/// <summary>
+		/// The amount of time that elapsed before the crawl completed
+		/// </summary>
+		public TimeSpan Elapsed { get; set; }
+
+		/// <summary>
+		/// Whether or not an error occurred during the crawl
+		/// that caused it to end prematurely
+		/// </summary>
+		public bool ErrorOccurred { get { return (ErrorException != null); } }
+
+		/// <summary>
+		/// The exception that caused the crawl to end prematurely
+		/// </summary>
+		public Exception ErrorException { get; set; }
+
+		/// <summary>
+		/// The context of the crawl
+		/// </summary>
+		public CrawlContext CrawlContext { get; set; }
+
+		#endregion
+	}
 }

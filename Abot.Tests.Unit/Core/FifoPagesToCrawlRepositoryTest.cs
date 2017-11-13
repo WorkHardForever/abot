@@ -7,9 +7,9 @@ namespace Abot.Tests.Unit.Core
     [TestFixture]
     public class FifoPagesToCrawlRepositoryTest : PagesToCrawlRepositoryTest
     {
-        public override IPagesToCrawlRepository GetInstance()
+        public override IQueueOfPagesToCrawlRepository GetInstance()
         {
-            return new FifoPagesToCrawlRepository();
+            return new QueueOfPagesToCrawlRepository();
         }
 
         [Test]

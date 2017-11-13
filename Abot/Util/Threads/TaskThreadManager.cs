@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace Abot.Util
 {
-
     /// <summary>
     /// A ThreadManager implementation that will use tpl Tasks to handle concurrency.
     /// </summary>
@@ -57,9 +56,9 @@ namespace Abot.Util
             foreach (var exception in aggException.InnerExceptions)
             {
                 if(_cancellationTokenSource.IsCancellationRequested)
-                    _logger.Warn(exception);//If the task was cancelled then this exception is expected happen and we dont care
+                    _logger.Warn(exception);	//If the task was cancelled then this exception is expected happen and we don't care
                 else
-                    _logger.Error(exception);//If the task was not cancelled then this is an error
+                    _logger.Error(exception);	//If the task was not cancelled then this is an error
             }
         }
     }

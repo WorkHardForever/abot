@@ -144,14 +144,12 @@
   <ItemGroup>
     <Compile Include="AssemblySetup.cs" />
     <Compile Include="Core\AbotConfigurationSectionHandlerTest.cs" />
-    <Compile Include="Core\BloomFilterCrawledUrlRepositoryTest.cs" />
     <Compile Include="Core\CompactCrawledUrlRepositoryTest.cs" />
     <Compile Include="Core\AngleSharpHyperLinkParserTest.cs" />
     <Compile Include="Util\CachedMemoryMonitorTest.cs" />
     <Compile Include="Core\PagesToCrawlRepositoryTest.cs" />
     <Compile Include="Core\CrawledUrlRepositoryTest.cs" />
     <Compile Include="Core\FifoPagesToCrawlRepositoryTest.cs" />
-    <Compile Include="Core\InMemoryCrawledUrlRepositoryTest.cs" />
     <Compile Include="Core\SchedulerTest.cs" />
     <Compile Include="Core\WebContentExtractorTest.cs" />
     <Compile Include="Util\ManualThreadManagerTest.cs" />

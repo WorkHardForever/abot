@@ -1,5 +1,4 @@
-﻿
-using Abot.Crawler;
+﻿using Abot.Crawler;
 using Abot.Poco;
 using System;
 
@@ -9,6 +8,7 @@ namespace Abot.Demo
     {
         static void Main(string[] args)
         {
+			Console.WriteLine("https://content.next.westlaw.com/robots.txt");
             log4net.Config.XmlConfigurator.Configure();
             PrintDisclaimer();
 
@@ -23,10 +23,10 @@ namespace Abot.Demo
 
             //Subscribe to any of these asynchronous events, there are also sychronous versions of each.
             //This is where you process data about specific events of the crawl
-            crawler.PageCrawlStartingAsync += crawler_ProcessPageCrawlStarting;
-            crawler.PageCrawlCompletedAsync += crawler_ProcessPageCrawlCompleted;
-            crawler.PageCrawlDisallowedAsync += crawler_PageCrawlDisallowed;
-            crawler.PageLinksCrawlDisallowedAsync += crawler_PageLinksCrawlDisallowed;
+            //crawler.PageCrawlStartingAsync += crawler_ProcessPageCrawlStarting;
+            //crawler.PageCrawlCompletedAsync += crawler_ProcessPageCrawlCompleted;
+            //crawler.PageCrawlDisallowedAsync += crawler_PageCrawlDisallowed;
+            //crawler.PageLinksCrawlDisallowedAsync += crawler_PageLinksCrawlDisallowed;
 
             //Start the crawl
             //This is a synchronous call
@@ -36,7 +36,7 @@ namespace Abot.Demo
             //all the statements that you were trying to read in the console window :).
             //Not enough data being logged? Change the app.config file's log4net log level from "INFO" TO "DEBUG"
 
-            PrintDisclaimer();
+            //PrintDisclaimer();
         }
 
         private static IWebCrawler GetDefaultWebCrawler()
@@ -46,22 +46,24 @@ namespace Abot.Demo
 
         private static IWebCrawler GetManuallyConfiguredWebCrawler()
         {
-            //Create a config object manually
-            CrawlConfiguration config = new CrawlConfiguration();
-            config.CrawlTimeoutSeconds = 0;
-            config.DownloadableContentTypes = "text/html, text/plain";
-            config.IsExternalPageCrawlingEnabled = false;
-            config.IsExternalPageLinksCrawlingEnabled = false;
-            config.IsRespectRobotsDotTextEnabled = false;
-            config.IsUriRecrawlingEnabled = false;
-            config.MaxConcurrentThreads = 10;
-            config.MaxPagesToCrawl = 10;
-            config.MaxPagesToCrawlPerDomain = 0;
-            config.MinCrawlDelayPerDomainMilliSeconds = 1000;
+			//Create a config object manually
+			CrawlConfiguration config = new CrawlConfiguration
+			{
+				CrawlTimeoutSeconds = 0,
+				DownloadableContentTypes = "text/html, text/plain",
+				IsExternalPageCrawlingEnabled = false,
+				IsExternalPageLinksCrawlingEnabled = false,
+				IsRespectRobotsDotTextEnabled = false,
+				IsUriRecrawlingEnabled = false,
+				MaxConcurrentThreads = 10,
+				MaxPagesToCrawl = 10,
+				MaxPagesToCrawlPerDomain = 0,
+				MinCrawlDelayPerDomainMilliSeconds = 1000
+			};
 
-            //Add you own values without modifying Abot's source code.
-            //These are accessible in CrawlContext.CrawlConfuration.ConfigurationException object throughout the crawl
-            config.ConfigurationExtensions.Add("Somekey1", "SomeValue1");
+			//Add you own values without modifying Abot's source code.
+			//These are accessible in CrawlContext.CrawlConfuration.ConfigurationException object throughout the crawl
+			config.ConfigurationExtensions.Add("Somekey1", "SomeValue1");
             config.ConfigurationExtensions.Add("Somekey2", "SomeValue2");
 
             //Initialize the crawler with custom configuration created above.
@@ -101,7 +103,7 @@ namespace Abot.Demo
             crawler.ShouldCrawlPageLinks((crawledPage, crawlContext) =>
             {
                 if (!crawledPage.IsInternal)
-                    return new CrawlDecision { Allow = false, Reason = "We dont crawl links of external pages" };
+                    return new CrawlDecision { Allow = false, Reason = "We don't crawl links of external pages" };
 
                 return new CrawlDecision { Allow = true };
             });
@@ -111,24 +113,26 @@ namespace Abot.Demo
 
         private static Uri GetSiteToCrawl(string[] args)
         {
-            string userInput = "";
+            string userInputUrl = string.Empty;
             if (args.Length < 1)
             {
-                System.Console.WriteLine("Please enter ABSOLUTE url to crawl:");
-                userInput = System.Console.ReadLine();
+                System.Console.WriteLine("Please, enter ABSOLUTE url to crawl (for ex.: https://github.com ):");
+                userInputUrl = System.Console.ReadLine();
             }
             else
             {
-                userInput = args[0];
+                userInputUrl = args[0];
             }
 
-            if (string.IsNullOrWhiteSpace(userInput))
-                throw new ApplicationException("Site url to crawl is as a required parameter");
+			var isAbsoluteUri = Uri.TryCreate(userInputUrl, UriKind.Absolute, out Uri result);
 
-            return new Uri(userInput);
+			if (string.IsNullOrWhiteSpace(userInputUrl) || !isAbsoluteUri)
+                throw new ApplicationException("Requare absolute url, without white spaces and not empty");
+
+            return result;
         }
 
-        private static void PrintDisclaimer()
+		private static void PrintDisclaimer()
         {
             PrintAttentionText("The demo is configured to only crawl a total of 10 pages and will wait 1 second in between http requests. This is to avoid getting you blocked by your isp or the sites you are trying to crawl. You can change these values in the app.config or Abot.Console.exe.config file.");
         }
@@ -141,22 +145,22 @@ namespace Abot.Demo
             System.Console.ForegroundColor = originalColor;
         }
 
-        static void crawler_ProcessPageCrawlStarting(object sender, PageCrawlStartingArgs e)
+        static void Crawler_ProcessPageCrawlStarting(object sender, PageCrawlStartingArgs e)
         {
             //Process data
         }
 
-        static void crawler_ProcessPageCrawlCompleted(object sender, PageCrawlCompletedArgs e)
+        static void Crawler_ProcessPageCrawlCompleted(object sender, PageCrawlCompletedArgs e)
         {
             //Process data
         }
 
-        static void crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlDisallowedArgs e)
+        static void Crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlDisallowedArgs e)
         {
             //Process data
         }
 
-        static void crawler_PageCrawlDisallowed(object sender, PageCrawlDisallowedArgs e)
+        static void Crawler_PageCrawlDisallowed(object sender, PageCrawlDisallowedArgs e)
         {
             //Process data
         }

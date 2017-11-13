@@ -1,122 +1,135 @@
-﻿using Abot.Util;
-using log4net;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Abot.Poco;
+using Abot.Util;
+using log4net;
 
 namespace Abot.Core
 {
-    /// <summary>
-    /// Rate limits or throttles on a per domain basis
-    /// </summary>
-    public interface IDomainRateLimiter
-    {
-        /// <summary>
-        /// If the domain of the param has been flagged for rate limiting, it will be rate limited according to the configured minimum crawl delay
-        /// </summary>
-        void RateLimit(Uri uri);
+	/// <summary>
+	/// Rate limits or throttles on a per domain basis
+	/// </summary>
+	[Serializable]
+	public class DomainRateLimiter : IDomainRateLimiter
+	{
+		#region Protected Fields
 
-        /// <summary>
-        /// Add a domain entry so that domain may be rate limited according the the param minumum crawl delay
-        /// </summary>
-        void AddDomain(Uri uri, long minCrawlDelayInMillisecs);
+		/// <summary>
+		/// Logger
+		/// </summary>
+		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
-        /// <summary>
-        /// Add/Update a domain entry so that domain may be rate limited according the the param minumum crawl delay
-        /// </summary>
-        void AddOrUpdateDomain(Uri uri, long minCrawlDelayInMillisecs);
+		protected ConcurrentDictionary<string, IRateLimiter> _rateLimiterLookup = new ConcurrentDictionary<string, IRateLimiter>();
 
-        /// <summary>
-        /// Remove a domain entry so that it will no longer be rate limited
-        /// </summary>
-        void RemoveDomain(Uri uri);
-    }
+		protected long _defaultMinCrawlDelayInMillisecs;
 
-    [Serializable]
-    public class DomainRateLimiter : IDomainRateLimiter
-    {
-        static ILog _logger = LogManager.GetLogger("AbotLogger");
-        ConcurrentDictionary<string, IRateLimiter> _rateLimiterLookup = new ConcurrentDictionary<string, IRateLimiter>();
-        long _defaultMinCrawlDelayInMillisecs;
+		#endregion
 
-        public DomainRateLimiter(long minCrawlDelayMillisecs)
-        {
-            if (minCrawlDelayMillisecs < 0)
-                throw new ArgumentException("minCrawlDelayMillisecs");
+		#region Ctor
 
-            if(minCrawlDelayMillisecs > 0)
-                _defaultMinCrawlDelayInMillisecs = minCrawlDelayMillisecs + 20;//IRateLimiter is always a little under so adding a little more time
-        }
+		public DomainRateLimiter(long minCrawlDelayMillisecs)
+		{
+			if (minCrawlDelayMillisecs < 0)
+				throw new ArgumentException(nameof(minCrawlDelayMillisecs));
 
-        public void RateLimit(Uri uri)
-        {
-            if (uri == null)
-                throw new ArgumentNullException("uri");
+			// IRateLimiter is always a little under so adding a little more time
+			if (minCrawlDelayMillisecs > 0)
+				_defaultMinCrawlDelayInMillisecs = minCrawlDelayMillisecs + 20;
+		}
 
-            IRateLimiter rateLimiter = GetRateLimter(uri, _defaultMinCrawlDelayInMillisecs);
-            if (rateLimiter == null)
-                return;
+		#endregion
 
-            Stopwatch timer = Stopwatch.StartNew();
-            rateLimiter.WaitToProceed();
-            timer.Stop();
+		#region Public Methods
 
-            if(timer.ElapsedMilliseconds > 10)
-                _logger.DebugFormat("Rate limited [{0}] [{1}] milliseconds", uri.AbsoluteUri, timer.ElapsedMilliseconds);
-        }
+		/// <summary>
+		/// If the domain of the param has been flagged for rate limiting,
+		/// it will be rate limited according to the configured minimum crawl delay
+		/// </summary>
+		public void RateLimit(Uri uri)
+		{
+			if (uri == null)
+				throw new ArgumentNullException("uri");
 
-        public void AddDomain(Uri uri, long minCrawlDelayInMillisecs)
-        {
-            if (uri == null)
-                throw new ArgumentNullException("uri");
+			IRateLimiter rateLimiter = GetRateLimiter(uri, _defaultMinCrawlDelayInMillisecs);
+			if (rateLimiter == null)
+				return;
 
-            if (minCrawlDelayInMillisecs < 1)
-                throw new ArgumentException("minCrawlDelayInMillisecs");
+			Stopwatch timer = Stopwatch.StartNew();
+			rateLimiter.WaitToProceed();
+			timer.Stop();
 
-            GetRateLimter(uri, Math.Max(minCrawlDelayInMillisecs, _defaultMinCrawlDelayInMillisecs));//just calling this method adds the new domain
-        }
+			if (timer.ElapsedMilliseconds > 10)
+				_logger.DebugFormat("Rate limited [{0}] [{1}] milliseconds", uri.AbsoluteUri, timer.ElapsedMilliseconds);
+		}
 
-        public void AddOrUpdateDomain(Uri uri, long minCrawlDelayInMillisecs)
-        {
-            if (uri == null)
-                throw new ArgumentNullException("uri");
+		/// <summary>
+		/// Add a domain entry so that domain may be rate limited according
+		/// the param minumum crawl delay
+		/// </summary>
+		public void AddDomain(Uri uri, long minCrawlDelayInMillisecs)
+		{
+			if (uri == null)
+				throw new ArgumentNullException(nameof(uri));
 
-            if (minCrawlDelayInMillisecs < 1)
-                throw new ArgumentException("minCrawlDelayInMillisecs");
+			if (minCrawlDelayInMillisecs < 1)
+				throw new ArgumentException($"{nameof(minCrawlDelayInMillisecs)} can't be < 1");
 
-            var delayToUse = Math.Max(minCrawlDelayInMillisecs, _defaultMinCrawlDelayInMillisecs);
-            if (delayToUse > 0)
-            {
-                var rateLimiter = new RateLimiter(1, TimeSpan.FromMilliseconds(delayToUse));
+			// just calling this method adds the new domain
+			GetRateLimiter(uri, Math.Max(minCrawlDelayInMillisecs, _defaultMinCrawlDelayInMillisecs));
+		}
 
-                _rateLimiterLookup.AddOrUpdate(uri.Authority, rateLimiter, (key, oldValue) => rateLimiter);
-                _logger.DebugFormat("Added/updated domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, delayToUse);
-            }
-        }
+		/// <summary>
+		/// Add/Update a domain entry so that domain may be rate limited according
+		/// the param minumum crawl delay
+		/// </summary>
+		public void AddOrUpdateDomain(Uri uri, long minCrawlDelayInMillisecs)
+		{
+			if (uri == null)
+				throw new ArgumentNullException(nameof(uri));
 
-        public void RemoveDomain(Uri uri)
-        {
-            IRateLimiter rateLimiter;
-            _rateLimiterLookup.TryRemove(uri.Authority, out rateLimiter);
-        }
+			if (minCrawlDelayInMillisecs < 1)
+				throw new ArgumentException(nameof(minCrawlDelayInMillisecs));
 
+			var delayToUse = Math.Max(minCrawlDelayInMillisecs, _defaultMinCrawlDelayInMillisecs);
+			if (delayToUse > 0)
+			{
+				var rateLimiter = new RateLimiter(1, TimeSpan.FromMilliseconds(delayToUse));
 
-        private IRateLimiter GetRateLimter(Uri uri, long minCrawlDelayInMillisecs)
-        {
-            IRateLimiter rateLimiter;
-            _rateLimiterLookup.TryGetValue(uri.Authority, out rateLimiter);
+				_rateLimiterLookup.AddOrUpdate(uri.Authority, rateLimiter, (key, oldValue) => rateLimiter);
+				_logger.DebugFormat("Added/updated domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, delayToUse);
+			}
+		}
 
-            if (rateLimiter == null && minCrawlDelayInMillisecs > 0)
-            {
-                rateLimiter = new RateLimiter(1, TimeSpan.FromMilliseconds(minCrawlDelayInMillisecs));
+		/// <summary>
+		/// Remove a domain entry so that it will no longer be rate limited
+		/// </summary>
+		public void RemoveDomain(Uri uri)
+		{
+			_rateLimiterLookup.TryRemove(uri.Authority, out IRateLimiter rateLimiter);
+		}
 
-                if (_rateLimiterLookup.TryAdd(uri.Authority, rateLimiter))
-                    _logger.DebugFormat("Added new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
-                else
-                    _logger.WarnFormat("Unable to add new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
-            }
+		#endregion
 
-            return rateLimiter;
-        }
-    }
+		#region Private Method
+
+		private IRateLimiter GetRateLimiter(Uri uri, long minCrawlDelayInMillisecs)
+		{
+			_rateLimiterLookup.TryGetValue(uri.Authority, out IRateLimiter rateLimiter);
+
+			if (rateLimiter == null && minCrawlDelayInMillisecs > 0)
+			{
+				rateLimiter = new RateLimiter(1, TimeSpan.FromMilliseconds(minCrawlDelayInMillisecs));
+
+				if (_rateLimiterLookup.TryAdd(uri.Authority, rateLimiter))
+					_logger.DebugFormat("Added new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
+				else
+					_logger.WarnFormat("Unable to add new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
+			}
+
+			return rateLimiter;
+		}
+
+		#endregion
+	}
 }

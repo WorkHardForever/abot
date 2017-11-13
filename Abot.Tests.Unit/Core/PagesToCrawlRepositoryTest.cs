@@ -8,11 +8,11 @@ namespace Abot.Tests.Unit.Core
     [TestFixture]
     public abstract class PagesToCrawlRepositoryTest
     {
-        protected IPagesToCrawlRepository _unitUnderTest;
+        protected IQueueOfPagesToCrawlRepository _unitUnderTest;
         PageToCrawl _page1;
         PageToCrawl _page2;
 
-        public abstract IPagesToCrawlRepository GetInstance();
+        public abstract IQueueOfPagesToCrawlRepository GetInstance();
 
         [SetUp]
         public void SetUp()

@@ -1,141 +1,200 @@
-﻿
-using Abot.Poco;
-using log4net;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using Abot.Poco;
+using log4net;
 
 namespace Abot.Core
 {
-    public interface IWebContentExtractor : IDisposable
-    {
-        PageContent GetContent(WebResponse response);
-    }
+	/// <summary>
+	/// Extractor for generating info from requested page
+	/// </summary>
+	[Serializable]
+	public class WebContentExtractor : IWebContentExtractor
+	{
+		#region Const
 
-    [Serializable]
-    public class WebContentExtractor : IWebContentExtractor
-    {
-        static ILog _logger = LogManager.GetLogger("AbotLogger");
+		/// <summary>
+		/// Find expression from : http://stackoverflow.com/questions/3458217/how-to-use-regular-expression-to-match-the-charset-string-in-html
+		/// </summary>
+		protected const string c_REGULAR_CHARSET = @"<meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s""']*)?([^>]*?)[\s""';]*charset\s*=[\s""']*([^\s""'/>]*)";
 
-        public virtual PageContent GetContent(WebResponse response)
-        {
-            using (MemoryStream memoryStream = GetRawData(response))
-            {
-                String charset = GetCharsetFromHeaders(response);
+		#endregion
 
-                if (charset == null) {
-                    memoryStream.Seek(0, SeekOrigin.Begin);
+		#region Protected Field
 
-                    // Do not wrap in closing statement to prevent closing of this stream.
-                    StreamReader srr = new StreamReader(memoryStream, Encoding.ASCII);
-                    String body = srr.ReadToEnd();
-                    charset = GetCharsetFromBody(body);
-                }
-                memoryStream.Seek(0, SeekOrigin.Begin);
+		/// <summary>
+		/// Logger
+		/// </summary>
+		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
-                charset = CleanCharset(charset);
-                Encoding e = GetEncoding(charset);
-                string content = "";
-                using (StreamReader sr = new StreamReader(memoryStream, e))
-                {
-                    content = sr.ReadToEnd();
-                }
+		#endregion
 
-                PageContent pageContent = new PageContent();
-                pageContent.Bytes = memoryStream.ToArray();
-                pageContent.Charset = charset;
-                pageContent.Encoding = e;
-                pageContent.Text = content;
+		#region Public Methods
 
-                return pageContent;
-            }
-        }
+		/// <summary>
+		/// Collect data from responsed page
+		/// </summary>
+		/// <param name="response">Web response</param>
+		/// <returns>Extract page</returns>
+		public virtual PageContent GetContent(WebResponse response)
+		{
+			using (MemoryStream memoryStream = GetRawData(response))
+			{
+				String charset = GetCharsetFromHeaders(response);
 
-        protected virtual string GetCharsetFromHeaders(WebResponse webResponse)
-        {
-            string charset = null;
-            String ctype = webResponse.Headers["content-type"];
-            if (ctype != null)
-            {
-                int ind = ctype.IndexOf("charset=");
-                if (ind != -1)
-                    charset = ctype.Substring(ind + 8);
-            }
-            return charset;
-        }
+				if (charset == null)
+				{
+					memoryStream.Seek(0, SeekOrigin.Begin);
 
-        protected virtual string GetCharsetFromBody(string body)
-        {
-            String charset = null;
-            
-            if (body != null)
-            {
-                //find expression from : http://stackoverflow.com/questions/3458217/how-to-use-regular-expression-to-match-the-charset-string-in-html
-                Match match = Regex.Match(body, @"<meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s""']*)?([^>]*?)[\s""';]*charset\s*=[\s""']*([^\s""'/>]*)", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    charset = string.IsNullOrWhiteSpace(match.Groups[2].Value) ? null : match.Groups[2].Value;
-                }
-            }
+					// Do not wrap in closing statement to prevent closing of this stream.
+					StreamReader reader = new StreamReader(memoryStream, Encoding.ASCII);
+					String body = reader.ReadToEnd();
+					charset = GetCharsetFromBody(body);
+				}
 
-            return charset;
-        }
-        
-        protected virtual Encoding GetEncoding(string charset)
-        {
-            Encoding e = Encoding.UTF8;
-            if (charset != null)
-            {
-                try
-                {
-                    e = Encoding.GetEncoding(charset);
-                }
-                catch{}
-            }
+				charset = CleanCharset(charset);
+				Encoding encoding = GetEncoding(charset);
 
-            return e;
-        }
+				string content = string.Empty;
 
-        protected virtual string CleanCharset(string charset)
-        {
-            //TODO temporary hack, this needs to be a configurable value
-            if (charset == "cp1251") //Russian, Bulgarian, Serbian cyrillic
-                charset = "windows-1251";
+				memoryStream.Seek(0, SeekOrigin.Begin);
+				using (StreamReader reader = new StreamReader(memoryStream, encoding))
+				{
+					content = reader.ReadToEnd();
+				}
 
-            return charset;
-        }
+				PageContent pageContent = new PageContent
+				{
+					Bytes = memoryStream.ToArray(),
+					Charset = charset,
+					Encoding = encoding,
+					Text = content
+				};
 
-        private MemoryStream GetRawData(WebResponse webResponse)
-        {
-            MemoryStream rawData = new MemoryStream();
+				return pageContent;
+			}
+		}
 
-            try
-            {
-                using (Stream rs = webResponse.GetResponseStream())
-                {
-                    byte[] buffer = new byte[1024];
-                    int read = rs.Read(buffer, 0, buffer.Length);
-                    while (read > 0)
-                    {
-                        rawData.Write(buffer, 0, read);
-                        read = rs.Read(buffer, 0, buffer.Length);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.WarnFormat("Error occurred while downloading content of url {0}", webResponse.ResponseUri.AbsoluteUri);
-                _logger.Warn(e);
-            }
+		#endregion
 
-            return rawData;
-        }
+		#region Protected Methods
 
-        public virtual void Dispose()
-        {
-            // Nothing to do
-        }
-    }
+		/// <summary>
+		/// Getting charset using response header
+		/// </summary>
+		/// <param name="webResponse">Web response</param>
+		/// <returns>Encoding</returns>
+		protected virtual string GetCharsetFromHeaders(WebResponse webResponse)
+		{
+			string charset = null;
+
+			String ctype = webResponse.Headers["content-type"];
+			if (ctype != null)
+			{
+				int ind = ctype.IndexOf("charset=");
+				if (ind != -1)
+					charset = ctype.Substring(ind + 8);
+			}
+
+			return charset;
+		}
+
+		/// <summary>
+		/// Try get charset using regex match
+		/// </summary>
+		/// <param name="body">Content</param>
+		/// <returns>Encoding</returns>
+		protected virtual string GetCharsetFromBody(string body)
+		{
+			String charset = null;
+
+			if (body != null)
+			{
+				Match match = Regex.Match(body, c_REGULAR_CHARSET, RegexOptions.IgnoreCase);
+				if (match.Success)
+				{
+					charset = string.IsNullOrWhiteSpace(match.Groups[2].Value) ?
+						null :
+						match.Groups[2].Value;
+				}
+			}
+
+			return charset;
+		}
+
+		/// <summary>
+		/// Get encoding or if charset = null set UTF-8
+		/// </summary>
+		/// <param name="charset">Charset of page</param>
+		/// <returns>Encoding</returns>
+		protected virtual Encoding GetEncoding(string charset)
+		{
+			Encoding encoding = Encoding.UTF8;
+
+			if (charset != null)
+			{
+				try
+				{
+					encoding = Encoding.GetEncoding(charset);
+				}
+				catch (Exception e)
+				{
+					_logger.Error(e);
+					throw e;
+				}
+			}
+
+			return encoding;
+		}
+
+		/// <summary>
+		/// Wrap browser charset value to .Net charsets
+		/// </summary>
+		/// <param name="charset"></param>
+		/// <returns></returns>
+		protected virtual string CleanCharset(string charset)
+		{
+			// TODO temporary hack, this needs to be a configurable value
+			// to do dictionary
+			if (charset == "cp1251") //Russian, Bulgarian, Serbian cyrillic
+				charset = "windows-1251";
+
+			return charset;
+		}
+
+		#endregion
+
+		#region Private Method
+
+		private MemoryStream GetRawData(WebResponse response)
+		{
+			MemoryStream rawData = new MemoryStream();
+
+			try
+			{
+				using (Stream rs = response.GetResponseStream())
+				{
+					byte[] buffer = new byte[1024];
+					int read = rs.Read(buffer, 0, buffer.Length);
+					while (read > 0)
+					{
+						rawData.Write(buffer, 0, read);
+						read = rs.Read(buffer, 0, buffer.Length);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				_logger.WarnFormat("Error occurred while downloading content of url {0}", response.ResponseUri.AbsoluteUri);
+				_logger.Warn(e);
+			}
+
+			return rawData;
+		}
+
+		#endregion
+	}
 }

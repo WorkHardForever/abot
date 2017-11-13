@@ -19,7 +19,7 @@ namespace Abot.Tests.Unit.Poco
             Assert.IsNull(unitUnderTest.Uri);
             Assert.AreEqual(0, unitUnderTest.CrawlDepth);
             Assert.IsNull(unitUnderTest.PageBag);
-            Assert.IsNull(unitUnderTest.LastRequest);
+            Assert.IsNull(unitUnderTest.LastRequestTime);
         }        
 
         [Test]
@@ -33,7 +33,7 @@ namespace Abot.Tests.Unit.Poco
             Assert.AreEqual("http://a.com/", unitUnderTest.Uri.AbsoluteUri);
             Assert.AreEqual(0, unitUnderTest.CrawlDepth);
             Assert.IsNotNull(unitUnderTest.PageBag);
-            Assert.IsNull(unitUnderTest.LastRequest);
+            Assert.IsNull(unitUnderTest.LastRequestTime);
         }
 
         [Test]

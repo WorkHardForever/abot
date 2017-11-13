@@ -12,7 +12,7 @@ namespace Abot.Tests.Unit.Core
     {
         Scheduler _unitUnderTest;
         Mock<ICrawledUrlRepository> _fakeCrawledUrlRepo;
-        Mock<IPagesToCrawlRepository> _fakePagesToCrawlRepo;
+        Mock<IQueueOfPagesToCrawlRepository> _fakePagesToCrawlRepo;
         PageToCrawl _page;
         List<PageToCrawl> _pages;
 
@@ -22,7 +22,7 @@ namespace Abot.Tests.Unit.Core
             _page = new PageToCrawl { Uri = new Uri("http://a.com/") };
             _pages = new List<PageToCrawl> { new PageToCrawl { Uri = new Uri("http://a.com/") }, new PageToCrawl { Uri = new Uri("http://b.com/") } };
             _fakeCrawledUrlRepo = new Mock<ICrawledUrlRepository>();
-            _fakePagesToCrawlRepo = new Mock<IPagesToCrawlRepository>();
+            _fakePagesToCrawlRepo = new Mock<IQueueOfPagesToCrawlRepository>();
 
             _unitUnderTest = new Scheduler(false, _fakeCrawledUrlRepo.Object, _fakePagesToCrawlRepo.Object);
         }
