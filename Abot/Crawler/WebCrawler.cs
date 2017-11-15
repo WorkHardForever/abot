@@ -38,7 +38,8 @@ namespace Abot.Crawler
 		/// <summary>
 		/// Logger
 		/// </summary>
-		protected ILog Logger { get { return _logger.Value; } }
+		protected ILog Logger => _logger.Value;
+
 		private Lazy<ILog> _logger = new Lazy<ILog>(() => LogManager.GetLogger(CrawlConfiguration.LoggerName));
 
 		/// <summary>
@@ -234,87 +235,7 @@ namespace Abot.Crawler
 		/// <returns></returns>
 		public virtual CrawlResult Crawl(Uri uri, CancellationTokenSource cancellationTokenSource)
 		{
-			if (uri == null)
-				throw new ArgumentNullException(nameof(uri));
-
-			_crawlContext.RootUri = _crawlContext.OriginalRootUri = uri;
-
-			if (cancellationTokenSource != null)
-				_crawlContext.CancellationTokenSource = cancellationTokenSource;
-
-			CrawlResult crawlResult = new CrawlResult
-			{
-				RootUri = _crawlContext.RootUri,
-				CrawlContext = _crawlContext
-			};
-
-			_crawlComplete = false;
-
-			// Print config
-			Logger.InfoFormat("About to crawl site [{0}]", uri.AbsoluteUri);
-			PrintConfigValues(_crawlContext.CrawlConfiguration);
-
-			if (_memoryManager != null)
-			{
-				_crawlContext.MemoryUsageBeforeCrawlInMb = _memoryManager.GetCurrentUsageInMb();
-				Logger.InfoFormat("Starting memory usage for site [{0}] is [{1}mb]", uri.AbsoluteUri, _crawlContext.MemoryUsageBeforeCrawlInMb);
-			}
-
-			_crawlContext.CrawlStartDate = DateTime.Now;
-			Stopwatch timer = Stopwatch.StartNew();
-
-			if (IsPayAttention(_crawlContext.CrawlConfiguration.CrawlTimeoutSeconds))
-			{
-				_timeoutTimer = new Timer(_crawlContext.CrawlConfiguration.CrawlTimeoutSeconds * c_MILLISECOND_TRANSLATION);
-				_timeoutTimer.Elapsed += HandleCrawlTimeout;
-				_timeoutTimer.Start();
-			}
-
-			try
-			{
-				PageToCrawl rootPage = new PageToCrawl(uri)
-				{
-					ParentUri = uri,
-					IsInternal = true,
-					IsRoot = true
-				};
-
-				// Check, can we crawl this page. If true, then collect to queue
-				if (ShouldSchedulePageLink(rootPage))
-					_scheduler.Add(rootPage);
-
-				VerifyRequiredAvailableMemory();
-
-				// Starting crawl root page
-				CrawlSite(crawlResult);
-			}
-			catch (Exception e)
-			{
-				crawlResult.ErrorException = e;
-				Logger.FatalFormat("An error occurred while crawling site [{0}]", uri);
-				Logger.Fatal(e);
-			}
-			finally
-			{
-				if (_threadManager != null)
-					_threadManager.Dispose();
-			}
-
-			if (_timeoutTimer != null)
-				_timeoutTimer.Stop();
-
-			timer.Stop();
-
-			if (_memoryManager != null)
-			{
-				_crawlContext.MemoryUsageAfterCrawlInMb = _memoryManager.GetCurrentUsageInMb();
-				Logger.InfoFormat("Ending memory usage for site [{0}] is [{1}mb]", uri.AbsoluteUri, _crawlContext.MemoryUsageAfterCrawlInMb);
-			}
-
-			crawlResult.Elapsed = timer.Elapsed;
-			Logger.InfoFormat("Crawl complete for site [{0}]: Crawled [{1}] pages in [{2}]", crawlResult.RootUri.AbsoluteUri, crawlResult.CrawlContext.CrawledCount, crawlResult.Elapsed);
-
-			return crawlResult;
+			return CrawlSiteUsingUriAsStartPoint(uri, cancellationTokenSource);
 		}
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -544,6 +465,103 @@ namespace Abot.Crawler
 		#region Protected Methods
 
 		/// <summary>
+		/// Incapsulate main logic of crawling
+		/// </summary>
+		/// <param name="uri"></param>
+		/// <param name="cancellationTokenSource"></param>
+		/// <returns></returns>
+		protected virtual CrawlResult CrawlSiteUsingUriAsStartPoint(Uri uri, CancellationTokenSource cancellationTokenSource)
+		{
+			if (uri == null)
+				throw new ArgumentNullException(nameof(uri));
+
+			_crawlContext.RootUri = _crawlContext.OriginalRootUri = uri;
+
+			if (cancellationTokenSource != null)
+				_crawlContext.CancellationTokenSource = cancellationTokenSource;
+
+			CrawlResult crawlResult = new CrawlResult
+			{
+				RootUri = _crawlContext.RootUri,
+				CrawlContext = _crawlContext
+			};
+
+			_crawlComplete = false;
+
+			// Print config if depth > 0. This use if we crawl site to depth, not sitemap
+			if (IsPayAttention(_crawlContext.CrawlConfiguration.MaxCrawlDepth))
+			{
+				Logger.InfoFormat("About to crawl site [{0}]", uri.AbsoluteUri);
+				PrintConfigValues(_crawlContext.CrawlConfiguration);
+			}
+
+			if (_memoryManager != null)
+			{
+				_crawlContext.MemoryUsageBeforeCrawlInMb = _memoryManager.GetCurrentUsageInMb();
+				Logger.InfoFormat("Starting memory usage for site [{0}] is [{1}mb]", uri.AbsoluteUri, _crawlContext.MemoryUsageBeforeCrawlInMb);
+			}
+
+			_crawlContext.CrawlStartDate = DateTime.Now;
+			Stopwatch timer = Stopwatch.StartNew();
+
+			if (IsPayAttention(_crawlContext.CrawlConfiguration.CrawlTimeoutSeconds))
+			{
+				_timeoutTimer = new Timer(_crawlContext.CrawlConfiguration.CrawlTimeoutSeconds * c_MILLISECOND_TRANSLATION);
+				_timeoutTimer.Elapsed += HandleCrawlTimeout;
+				_timeoutTimer.Start();
+			}
+
+			try
+			{
+				StartCrawlRootPage(uri, crawlResult);
+			}
+			catch (Exception e)
+			{
+				crawlResult.ErrorException = e;
+				Logger.FatalFormat("An error occurred while crawling site [{0}]", uri);
+				Logger.Fatal(e);
+			}
+			finally
+			{
+				_threadManager?.Dispose();
+			}
+
+			_timeoutTimer?.Stop();
+
+			timer.Stop();
+
+			if (_memoryManager != null)
+			{
+				_crawlContext.MemoryUsageAfterCrawlInMb = _memoryManager.GetCurrentUsageInMb();
+				Logger.InfoFormat("Ending memory usage for site [{0}] is [{1}mb]", uri.AbsoluteUri, _crawlContext.MemoryUsageAfterCrawlInMb);
+			}
+
+			crawlResult.Elapsed = timer.Elapsed;
+			Logger.InfoFormat("Crawl complete for site [{0}]: Crawled [{1}] pages in [{2}]", crawlResult.RootUri.AbsoluteUri, crawlResult.CrawlContext.CrawledCount, crawlResult.Elapsed);
+
+			return crawlResult;
+		}
+
+		protected virtual void StartCrawlRootPage(Uri uri, CrawlResult crawlResult)
+		{
+			PageToCrawl rootPage = new PageToCrawl(uri)
+			{
+				ParentUri = uri,
+				IsInternal = true,
+				IsRoot = true
+			};
+
+			// Check, can we crawl this page. If true, then collect to queue
+			if (ShouldSchedulePageLink(rootPage))
+				_scheduler.Add(rootPage);
+
+			VerifyRequiredAvailableMemory();
+
+			// Starting crawl root page
+			CrawlSite(crawlResult);
+		}
+
+		/// <summary>
 		/// Main crawl method, where we run our spider to discover this site
 		/// in several threads if it available
 		/// </summary>
@@ -582,12 +600,11 @@ namespace Abot.Crawler
 
 			if (!_memoryManager.IsSpaceAvailable(_crawlContext.CrawlConfiguration.MinAvailableMemoryRequiredInMb))
 				throw new InsufficientMemoryException(
-					string.Format("Process does not have the configured [{0}mb] of available memory to crawl site [{1}]. " +
-								  "This is configurable through the minAvailableMemoryRequiredInMb " +
-								  "in app.conf or CrawlConfiguration.MinAvailableMemoryRequiredInMb.",
-									  _crawlContext.CrawlConfiguration.MinAvailableMemoryRequiredInMb,
-									  _crawlContext.RootUri)
-					);
+					$"Process does not have the configured [{_crawlContext.CrawlConfiguration.MinAvailableMemoryRequiredInMb}mb] " +
+					$"of available memory to crawl site [{_crawlContext.RootUri}]. " +
+					"This is configurable through the minAvailableMemoryRequiredInMb " +
+					"in app.conf or CrawlConfiguration.MinAvailableMemoryRequiredInMb."
+				);
 		}
 
 		/// <summary>
@@ -951,7 +968,7 @@ namespace Abot.Crawler
 			}
 
 			if (shouldCrawlPageDecision.Allow)
-				shouldCrawlPageDecision = (_shouldCrawlPageDecisionMaker != null) ?
+				shouldCrawlPageDecision = _shouldCrawlPageDecisionMaker != null ?
 					_shouldCrawlPageDecisionMaker.Invoke(pageToCrawl, _crawlContext) :
 					new CrawlDecision { Allow = true };
 

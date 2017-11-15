@@ -33,7 +33,7 @@ namespace Abot.Poco
 		/// Whether or not an error occurred during the crawl
 		/// that caused it to end prematurely
 		/// </summary>
-		public bool ErrorOccurred { get { return (ErrorException != null); } }
+		public bool ErrorOccurred => ErrorException != null;
 
 		/// <summary>
 		/// The exception that caused the crawl to end prematurely

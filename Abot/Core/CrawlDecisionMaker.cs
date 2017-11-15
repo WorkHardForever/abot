@@ -40,7 +40,9 @@ namespace Abot.Core
 
 			if (pageToCrawl.RedirectedFrom != null &&
 				pageToCrawl.RedirectPosition > crawlContext.CrawlConfiguration.HttpRequestMaxAutoRedirects)
-				return new CrawlDecision { Allow = false, Reason = string.Format("HttpRequestMaxAutoRedirects limit of [{0}] has been reached", crawlContext.CrawlConfiguration.HttpRequestMaxAutoRedirects) };
+				return new CrawlDecision { Allow = false, Reason =
+					$"HttpRequestMaxAutoRedirects limit of [{crawlContext.CrawlConfiguration.HttpRequestMaxAutoRedirects}] has been reached"
+				};
 
 			if (pageToCrawl.CrawlDepth > crawlContext.CrawlConfiguration.MaxCrawlDepth)
 				return new CrawlDecision { Allow = false, Reason = "Crawl depth is above max" };
@@ -48,12 +50,14 @@ namespace Abot.Core
 			if (!pageToCrawl.Uri.Scheme.StartsWith(c_URI_START_WITH_HTTP))
 				return new CrawlDecision { Allow = false, Reason = "Scheme does not begin with http" };
 
-			//TODO Do we want to ignore redirect chains (ie.. do not treat them as seperate page crawls)?
+			// TODO Do we want to ignore redirect chains (ie.. do not treat them as seperate page crawls)?
 			if (!pageToCrawl.IsRetry &&
 				crawlContext.CrawlConfiguration.MaxPagesToCrawl > 0 &&
 				crawlContext.CrawledCount + crawlContext.Scheduler.Count + 1 > crawlContext.CrawlConfiguration.MaxPagesToCrawl)
 			{
-				return new CrawlDecision { Allow = false, Reason = string.Format("MaxPagesToCrawl limit of [{0}] has been reached", crawlContext.CrawlConfiguration.MaxPagesToCrawl) };
+				return new CrawlDecision { Allow = false, Reason =
+					$"MaxPagesToCrawl limit of [{crawlContext.CrawlConfiguration.MaxPagesToCrawl}] has been reached"
+				};
 			}
 
 			if (!pageToCrawl.IsRetry &&
@@ -62,7 +66,10 @@ namespace Abot.Core
 				pagesCrawledInThisDomain > 0)
 			{
 				if (pagesCrawledInThisDomain >= crawlContext.CrawlConfiguration.MaxPagesToCrawlPerDomain)
-					return new CrawlDecision { Allow = false, Reason = string.Format("MaxPagesToCrawlPerDomain limit of [{0}] has been reached for domain [{1}]", crawlContext.CrawlConfiguration.MaxPagesToCrawlPerDomain, pageToCrawl.Uri.Authority) };
+					return new CrawlDecision { Allow = false, Reason =
+						$"MaxPagesToCrawlPerDomain limit of [{crawlContext.CrawlConfiguration.MaxPagesToCrawlPerDomain}] " +
+						$"has been reached for domain [{pageToCrawl.Uri.Authority}]"
+					};
 			}
 
 			if (!crawlContext.CrawlConfiguration.IsExternalPageCrawlingEnabled && !pageToCrawl.IsInternal)

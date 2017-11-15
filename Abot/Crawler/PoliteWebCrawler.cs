@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Abot.Core;
@@ -95,33 +97,52 @@ namespace Abot.Crawler
 		/// <returns></returns>
 		public override CrawlResult Crawl(Uri uri, CancellationTokenSource cancellationTokenSource)
 		{
+			TryLoadRobotsTxt(uri);
+
+			PageCrawlStarting += (s, e) => _domainRateLimiter.RateLimit(e.PageToCrawl.Uri);
+
+			return base.Crawl(uri, cancellationTokenSource);
+		}
+
+		/// <summary>
+		/// Try to find and load site robots.txt
+		/// </summary>
+		/// <param name="uri"></param>
+		protected bool TryLoadRobotsTxt(Uri uri)
+		{
 			int robotsDotTextCrawlDelayInSecs = 0;
 			int robotsDotTextCrawlDelayInMillisecs = 0;
 
-			//Load robots.txt
+			// Load robots.txt
 			if (_crawlContext.CrawlConfiguration.IsRespectRobotsDotTextEnabled)
 			{
 				_robotsDotText = _robotsDotTextFinder.Find(uri);
 
 				if (_robotsDotText != null)
 				{
+					Logger.InfoFormat("Robots.txt was found!");
+
 					FireRobotsDotTextParseCompletedAsync(_robotsDotText.Robots);
 					FireRobotsDotTextParseCompleted(_robotsDotText.Robots);
 
 					robotsDotTextCrawlDelayInSecs = _robotsDotText.GetCrawlDelay(_crawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
 					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * c_MILLISECOND_TRANSLATION;
 				}
+				else
+				{
+					Logger.InfoFormat("Robots.txt was NOT found!");
+				}
 			}
 
 			// Use whichever value is greater between the actual crawl delay value found,
 			// the max allowed crawl delay value or the minimum crawl delay required for every domain
 			if (robotsDotTextCrawlDelayInSecs > 0 &&
-				robotsDotTextCrawlDelayInMillisecs > _crawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds)
+			    robotsDotTextCrawlDelayInMillisecs > _crawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds)
 			{
 				if (robotsDotTextCrawlDelayInSecs > _crawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds)
 				{
 					Logger.WarnFormat("[{0}] robot.txt file directive [Crawl-delay: {1}] is above the value set " +
-									  "in the config value MaxRobotsDotTextCrawlDelay, will use MaxRobotsDotTextCrawlDelay value instead.",
+					                  "in the config value MaxRobotsDotTextCrawlDelay, will use MaxRobotsDotTextCrawlDelay value instead.",
 									  uri,
 									  _crawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds);
 
@@ -129,13 +150,14 @@ namespace Abot.Crawler
 					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * c_MILLISECOND_TRANSLATION;
 				}
 
-				Logger.WarnFormat("[{0}] robot.txt file directive [Crawl-delay: {1}] will be respected.", uri, robotsDotTextCrawlDelayInSecs);
+				Logger.WarnFormat("[{0}] robot.txt file directive [Crawl-delay: {1}] will be respected.",
+					uri,
+					robotsDotTextCrawlDelayInSecs);
+
 				_domainRateLimiter.AddDomain(uri, robotsDotTextCrawlDelayInMillisecs);
 			}
 
-			PageCrawlStarting += (s, e) => _domainRateLimiter.RateLimit(e.PageToCrawl.Uri);
-
-			return base.Crawl(uri, cancellationTokenSource);
+			return _robotsDotText != null;
 		}
 
 		#endregion
@@ -177,8 +199,8 @@ namespace Abot.Crawler
 				if (!allowedByRobots)
 				{
 					Logger.DebugFormat("Page [{0}] [Disallowed by robots.txt file], however since " +
-					                   "IsIgnoreRobotsDotTextIfRootDisallowedEnabled is set to true " +
-					                   "the robots.txt file will be ignored for this site.",
+									   "IsIgnoreRobotsDotTextIfRootDisallowedEnabled is set to true " +
+									   "the robots.txt file will be ignored for this site.",
 									   pageToCrawl.Uri.AbsoluteUri);
 
 					_robotsDotText = null;
@@ -186,8 +208,8 @@ namespace Abot.Crawler
 				else if (!allPathsBelowRootAllowedByRobots)
 				{
 					Logger.DebugFormat("All Pages below [{0}] [Disallowed by robots.txt file], however since " +
-					                   "IsIgnoreRobotsDotTextIfRootDisallowedEnabled is set to true the robots.txt " +
-					                   "file will be ignored for this site.",
+									   "IsIgnoreRobotsDotTextIfRootDisallowedEnabled is set to true the robots.txt " +
+									   "file will be ignored for this site.",
 									   pageToCrawl.Uri.AbsoluteUri);
 
 					_robotsDotText = null;

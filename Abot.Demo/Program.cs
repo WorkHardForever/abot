@@ -8,13 +8,13 @@ namespace Abot.Demo
     {
         static void Main(string[] args)
         {
-			Console.WriteLine("https://content.next.westlaw.com/robots.txt");
             log4net.Config.XmlConfigurator.Configure();
-            PrintDisclaimer();
 
-            Uri uriToCrawl = GetSiteToCrawl(args);
+            //PrintDisclaimer();
 
-            IWebCrawler crawler;
+            Uri uriToCrawl = GetSiteToCrawl(new string[] { "https://content.next.westlaw.com"});//GetSiteToCrawl(args);
+
+			IWebCrawler crawler;
 
             //Uncomment only one of the following to see that instance in action
             crawler = GetDefaultWebCrawler();
@@ -23,10 +23,10 @@ namespace Abot.Demo
 
             //Subscribe to any of these asynchronous events, there are also sychronous versions of each.
             //This is where you process data about specific events of the crawl
-            //crawler.PageCrawlStartingAsync += crawler_ProcessPageCrawlStarting;
-            //crawler.PageCrawlCompletedAsync += crawler_ProcessPageCrawlCompleted;
-            //crawler.PageCrawlDisallowedAsync += crawler_PageCrawlDisallowed;
-            //crawler.PageLinksCrawlDisallowedAsync += crawler_PageLinksCrawlDisallowed;
+            //crawler.PageCrawlStartingAsync += Crawler_ProcessPageCrawlStarting;
+            //crawler.PageCrawlCompletedAsync += Crawler_ProcessPageCrawlCompleted;
+            //crawler.PageCrawlDisallowedAsync += Crawler_PageCrawlDisallowed;
+            //crawler.PageLinksCrawlDisallowedAsync += Crawler_PageLinksCrawlDisallowed;
 
             //Start the crawl
             //This is a synchronous call
@@ -41,7 +41,7 @@ namespace Abot.Demo
 
         private static IWebCrawler GetDefaultWebCrawler()
         {
-            return new PoliteWebCrawler();
+            return new GoogleWebCrawler();
         }
 
         private static IWebCrawler GetManuallyConfiguredWebCrawler()
