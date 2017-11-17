@@ -10,9 +10,9 @@ namespace Abot.Demo
         {
             log4net.Config.XmlConfigurator.Configure();
 
-            //PrintDisclaimer();
+            PrintDisclaimer();
 
-            Uri uriToCrawl = GetSiteToCrawl(new string[] { "https://content.next.westlaw.com"});//GetSiteToCrawl(args);
+            Uri uriToCrawl = GetSiteToCrawl(args);
 
 			IWebCrawler crawler;
 

@@ -123,13 +123,16 @@ namespace Abot.Core
 				return new CrawlDecision { Allow = false, Reason = "Null HttpWebResponse" };
 
 			if (crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
-				return new CrawlDecision { Allow = false, Reason = "HttpStatusCode is not 200" };
+				return new CrawlDecision { Allow = false, Reason = $"Status code {crawledPage.HttpWebResponse.StatusCode}" };
 
 			if (!IsDownloadableByContentType(crawledPage, crawlContext, out List<string> cleanDownloadableContentTypes))
 				return new CrawlDecision { Allow = false, Reason = "Content type is not any of the following: " + string.Join(",", cleanDownloadableContentTypes) };
 
 			if (crawlContext.CrawlConfiguration.MaxPageSizeInBytes > 0 && crawledPage.HttpWebResponse.ContentLength > crawlContext.CrawlConfiguration.MaxPageSizeInBytes)
-				return new CrawlDecision { Allow = false, Reason = string.Format("Page size of [{0}] bytes is above the max allowable of [{1}] bytes", crawledPage.HttpWebResponse.ContentLength, crawlContext.CrawlConfiguration.MaxPageSizeInBytes) };
+				return new CrawlDecision { Allow = false, Reason =
+					$"Page size of [{crawledPage.HttpWebResponse.ContentLength}] bytes is above the max allowable of " +
+					$"[{crawlContext.CrawlConfiguration.MaxPageSizeInBytes}] bytes"
+				};
 
 			return new CrawlDecision { Allow = true };
 		}

@@ -62,9 +62,17 @@ namespace Abot.Core
 		public IRobotsDotText Find(Uri rootUri)
 		{
 			if (rootUri == null)
-				throw new ArgumentNullException("rootUri");
+				throw new ArgumentNullException(nameof(rootUri));
 
 			Uri robotsUri = new Uri(rootUri, c_ROBOTS_TXT);
+
+			// If should crawl site not from start page
+			if (!robotsUri.ToString().Contains(rootUri.ToString()))
+			{
+				_logger.DebugFormat("Your url couldn't have robots.txt");
+				return null;
+			}
+
 			CrawledPage page = _pageRequester.MakeRequest(robotsUri);
 
 			if (page == null ||

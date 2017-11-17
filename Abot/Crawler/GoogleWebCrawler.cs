@@ -111,7 +111,7 @@ namespace Abot.Crawler
 
 			if (sitemap.Sitemaps != null && sitemap.Sitemaps.Any())
 			{
-				Logger.InfoFormat("Sitemap: {0} | Locs' count: {1}", sitemap.Location, sitemap.Sitemaps.Count());
+				Logger.InfoFormat("Sitemap: {0} | Inner sitemaps' count: {1}", sitemap.Location, sitemap.Sitemaps.Count());
 
 				foreach (IRobotsSitemap derivedSitemap in sitemap.Sitemaps)
 				{
@@ -121,7 +121,7 @@ namespace Abot.Crawler
 
 			if (sitemap.Items != null && sitemap.Items.Any())
 			{
-				Logger.InfoFormat("Uris' count: {0}", sitemap.Items.Count());
+				Logger.InfoFormat("Sitemap: {0} | Uris' count: {1}", sitemap.Location , sitemap.Items.Count());
 
 				_scheduler.Add(sitemap.Items.Select(x => new PageToCrawl(x.Location)));
 
