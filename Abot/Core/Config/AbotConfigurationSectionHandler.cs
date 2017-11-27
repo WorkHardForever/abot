@@ -81,7 +81,7 @@ namespace Abot.Core
 		/// <returns>Abot Configuration Section Handler</returns>
 		public static AbotConfigurationSectionHandler LoadFromXml()
 		{
-			return ((AbotConfigurationSectionHandler)System.Configuration.ConfigurationManager.GetSection(c_CONFIG_SECTION));
+			return (System.Configuration.ConfigurationManager.GetSection(c_CONFIG_SECTION) as AbotConfigurationSectionHandler);
 		}
 
 		#endregion

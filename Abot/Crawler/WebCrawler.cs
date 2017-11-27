@@ -39,33 +39,12 @@ namespace Abot.Crawler
 		/// Logger
 		/// </summary>
 		protected ILog Logger => _logger.Value;
-
 		private Lazy<ILog> _logger = new Lazy<ILog>(() => LogManager.GetLogger(CrawlConfiguration.LoggerName));
 
 		/// <summary>
 		/// Config for crawling
 		/// </summary>
 		protected CrawlContext _crawlContext;
-
-		/// <summary>
-		/// Trigger that fire, when crawl is over
-		/// </summary>
-		protected bool _crawlComplete;
-
-		/// <summary>
-		/// Trigger that fire, when crawl should stop working
-		/// </summary>
-		protected bool _crawlStopReported;
-
-		/// <summary>
-		/// Trigger that fire, when was cancellation request
-		/// </summary>
-		protected bool _crawlCancellationReported;
-
-		/// <summary>
-		/// Trigger that fire, when count of crawl pages out of limit pages
-		/// </summary>
-		protected bool _maxPagesToCrawlLimitReachedOrScheduled;
 
 		/// <summary>
 		/// Time for waiting between 2 crawling operations.
@@ -102,6 +81,30 @@ namespace Abot.Crawler
 		/// Checks the memory usage of the host process
 		/// </summary>
 		protected IMemoryManager _memoryManager;
+
+		#region Triggers
+
+		/// <summary>
+		/// Trigger that fire, when crawl is over
+		/// </summary>
+		protected bool _crawlComplete;
+
+		/// <summary>
+		/// Trigger that fire, when crawl should stop working
+		/// </summary>
+		protected bool _crawlStopReported;
+
+		/// <summary>
+		/// Trigger that fire, when was cancellation request
+		/// </summary>
+		protected bool _crawlCancellationReported;
+
+		/// <summary>
+		/// Trigger that fire, when count of crawl pages out of limit pages
+		/// </summary>
+		protected bool _maxPagesToCrawlLimitReachedOrScheduled;
+
+		#endregion
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 

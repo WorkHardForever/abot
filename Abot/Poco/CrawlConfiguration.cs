@@ -175,8 +175,9 @@ namespace Abot.Poco
 		/// before starting a crawl, throws InsufficientMemoryException.
 		/// If zero, this setting has no effect.
 		/// </summary>
-		/// <exception cref="http://msdn.microsoft.com/en-us/library/system.insufficientmemoryexception.aspx">
+		/// <exception>
 		/// InsufficientMemoryException
+		/// http://msdn.microsoft.com/en-us/library/system.insufficientmemoryexception.aspx
 		/// </exception>
 		public int MinAvailableMemoryRequiredInMb { get; set; }
 

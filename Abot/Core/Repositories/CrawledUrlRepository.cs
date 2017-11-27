@@ -13,6 +13,10 @@ namespace Abot.Core
 	{
 		#region Private field
 
+		/// <summary>
+		/// Why dictionary?
+		/// https://social.msdn.microsoft.com/Forums/vstudio/en-US/226c8fc0-4c6b-49d0-baf3-85c658d810eb/why-is-there-no-hashset-list-in-systemcollectionsconcurrency?forum=netfxbcl
+		/// </summary>
 		private ConcurrentDictionary<long, byte> _urlRepository = new ConcurrentDictionary<long, byte>();
 
 		#endregion

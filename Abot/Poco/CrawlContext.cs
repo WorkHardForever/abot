@@ -29,13 +29,13 @@ namespace Abot.Poco
 		#region Public Variables
 
 		/// <summary>
-		/// The root of the crawl
+		/// The root of the crawl specified in the configuration.
+		/// If the root URI was redirected to another URI, it will be set in RootUri.
 		/// </summary>
 		public Uri RootUri { get; set; }
 
 		/// <summary>
-		/// The root of the crawl specified in the configuration.
-		/// If the root URI was redirected to another URI, it will be set in RootUri.
+		/// The root of the crawl
 		/// </summary>
 		public Uri OriginalRootUri { get; set; }
 

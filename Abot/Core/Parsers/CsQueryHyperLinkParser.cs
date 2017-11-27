@@ -16,6 +16,7 @@ namespace Abot.Core
 		#region Consts
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+		public const string c_PARSER_NAME = "CsQuery";
 		public const string c_HREF = "href";
 		public const string c_LINK = "link";
 		public const string c_A_and_AREA = "a, area";
@@ -34,7 +35,7 @@ namespace Abot.Core
 		/// <summary>
 		/// Requare for logger information. Parser name can be equal as name of your derived class
 		/// </summary>
-		protected override string ParserType { get { return "CsQuery"; } }
+		protected override string ParserType { get { return c_PARSER_NAME; } }
 
 		#endregion
 
