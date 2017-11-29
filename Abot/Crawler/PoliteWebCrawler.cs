@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Abot.Core;
+using Abot.Core.Repositories;
+using Abot.Core.Robots;
 using Abot.Poco;
 using Abot.Util;
 using Robots;
@@ -21,17 +23,17 @@ namespace Abot.Crawler
 		/// <summary>
 		/// Rate limmits
 		/// </summary>
-		protected IDomainRateLimiter _domainRateLimiter;
+		protected IDomainRateLimiter DomainRateLimiter;
 
 		/// <summary>
 		/// Wrapper for IRobots. try to find robots.txt page
 		/// </summary>
-		protected IRobotsDotTextFinder _robotsDotTextFinder;
+		protected IRobotsDotTextFinder RobotsDotTextFinder;
 
 		/// <summary>
 		/// Collect content from robots.txt page
 		/// </summary>
-		protected IRobotsDotText _robotsDotText;
+		protected IRobotsDotText RobotsDotText;
 
 		#endregion
 
@@ -77,11 +79,11 @@ namespace Abot.Crawler
 			IRobotsDotTextFinder robotsDotTextFinder)
 			: base(crawlConfiguration, crawlDecisionMaker, threadManager, scheduler, pageRequester, hyperLinkParser, memoryManager)
 		{
-			_domainRateLimiter = domainRateLimiter ??
-				new DomainRateLimiter(_crawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds);
+			DomainRateLimiter = domainRateLimiter ??
+				new DomainRateLimiter(CrawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds);
 
-			_robotsDotTextFinder = robotsDotTextFinder ??
-				new RobotsDotTextFinder(new PageRequester(_crawlContext.CrawlConfiguration));
+			RobotsDotTextFinder = robotsDotTextFinder ??
+				new RobotsDotTextFinder(new PageRequester(CrawlContext.CrawlConfiguration));
 		}
 
 		#endregion
@@ -99,7 +101,7 @@ namespace Abot.Crawler
 		{
 			TryLoadRobotsTxt(uri);
 
-			PageCrawlStarting += (s, e) => _domainRateLimiter.RateLimit(e.PageToCrawl.Uri);
+			PageCrawlStarting += (s, e) => DomainRateLimiter.RateLimit(e.PageToCrawl.Uri);
 
 			return base.Crawl(uri, cancellationTokenSource);
 		}
@@ -114,19 +116,19 @@ namespace Abot.Crawler
 			int robotsDotTextCrawlDelayInMillisecs = 0;
 
 			// Load robots.txt
-			if (_crawlContext.CrawlConfiguration.IsRespectRobotsDotTextEnabled)
+			if (CrawlContext.CrawlConfiguration.IsRespectRobotsDotTextEnabled)
 			{
-				_robotsDotText = _robotsDotTextFinder.Find(uri);
+				RobotsDotText = RobotsDotTextFinder.Find(uri);
 
-				if (_robotsDotText != null)
+				if (RobotsDotText != null)
 				{
 					Logger.InfoFormat("Robots.txt was found!");
 
-					FireRobotsDotTextParseCompletedAsync(_robotsDotText.Robots);
-					FireRobotsDotTextParseCompleted(_robotsDotText.Robots);
+					FireRobotsDotTextParseCompletedAsync(RobotsDotText.Robots);
+					FireRobotsDotTextParseCompleted(RobotsDotText.Robots);
 
-					robotsDotTextCrawlDelayInSecs = _robotsDotText.GetCrawlDelay(_crawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
-					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * c_MILLISECOND_TRANSLATION;
+					robotsDotTextCrawlDelayInSecs = RobotsDotText.GetCrawlDelay(CrawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
+					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * MillisecondTranslation;
 				}
 				else
 				{
@@ -137,27 +139,27 @@ namespace Abot.Crawler
 			// Use whichever value is greater between the actual crawl delay value found,
 			// the max allowed crawl delay value or the minimum crawl delay required for every domain
 			if (robotsDotTextCrawlDelayInSecs > 0 &&
-			    robotsDotTextCrawlDelayInMillisecs > _crawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds)
+			    robotsDotTextCrawlDelayInMillisecs > CrawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds)
 			{
-				if (robotsDotTextCrawlDelayInSecs > _crawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds)
+				if (robotsDotTextCrawlDelayInSecs > CrawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds)
 				{
 					Logger.WarnFormat("[{0}] robot.txt file directive [Crawl-delay: {1}] is above the value set " +
 					                  "in the config value MaxRobotsDotTextCrawlDelay, will use MaxRobotsDotTextCrawlDelay value instead.",
 									  uri,
-									  _crawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds);
+									  CrawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds);
 
-					robotsDotTextCrawlDelayInSecs = _crawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds;
-					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * c_MILLISECOND_TRANSLATION;
+					robotsDotTextCrawlDelayInSecs = CrawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds;
+					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * MillisecondTranslation;
 				}
 
 				Logger.WarnFormat("[{0}] robot.txt file directive [Crawl-delay: {1}] will be respected.",
 					uri,
 					robotsDotTextCrawlDelayInSecs);
 
-				_domainRateLimiter.AddDomain(uri, robotsDotTextCrawlDelayInMillisecs);
+				DomainRateLimiter.AddDomain(uri, robotsDotTextCrawlDelayInMillisecs);
 			}
 
-			return _robotsDotText != null;
+			return RobotsDotText != null;
 		}
 
 		#endregion
@@ -173,14 +175,14 @@ namespace Abot.Crawler
 		{
 			// Check is RobotsDotTextUserAgentString contain in robots.txt
 			bool allowedByRobots = true;
-			if (_robotsDotText != null)
-				allowedByRobots = _robotsDotText.IsUrlAllowed(pageToCrawl.Uri.AbsoluteUri,
-															  _crawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
+			if (RobotsDotText != null)
+				allowedByRobots = RobotsDotText.IsUrlAllowed(pageToCrawl.Uri.AbsoluteUri,
+															  CrawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
 
 			// https://github.com/sjdirect/abot/issues/96 Handle scenario where the root is allowed
 			// but all the paths below are disallowed like "disallow: /*"
 			var allPathsBelowRootAllowedByRobots = false;
-			if (_robotsDotText != null &&
+			if (RobotsDotText != null &&
 				pageToCrawl.IsRoot &&
 				allowedByRobots)
 			{
@@ -188,12 +190,12 @@ namespace Abot.Crawler
 					pageToCrawl.Uri.AbsoluteUri + "aaaaa" :
 					pageToCrawl.Uri.AbsoluteUri + "/aaaaa";
 
-				allPathsBelowRootAllowedByRobots = _robotsDotText.IsUrlAllowed(
+				allPathsBelowRootAllowedByRobots = RobotsDotText.IsUrlAllowed(
 					anyPathOffRoot,
-					_crawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
+					CrawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
 			}
 
-			if (_crawlContext.CrawlConfiguration.IsIgnoreRobotsDotTextIfRootDisallowedEnabled &&
+			if (CrawlContext.CrawlConfiguration.IsIgnoreRobotsDotTextIfRootDisallowedEnabled &&
 				pageToCrawl.IsRoot)
 			{
 				if (!allowedByRobots)
@@ -203,7 +205,7 @@ namespace Abot.Crawler
 									   "the robots.txt file will be ignored for this site.",
 									   pageToCrawl.Uri.AbsoluteUri);
 
-					_robotsDotText = null;
+					RobotsDotText = null;
 				}
 				else if (!allPathsBelowRootAllowedByRobots)
 				{
@@ -212,7 +214,7 @@ namespace Abot.Crawler
 									   "file will be ignored for this site.",
 									   pageToCrawl.Uri.AbsoluteUri);
 
-					_robotsDotText = null;
+					RobotsDotText = null;
 				}
 
 			}
@@ -245,7 +247,7 @@ namespace Abot.Crawler
 			//Fire each subscribers delegate async
 			foreach (var subscriber in threadSafeEvent.GetInvocationList().Select(x => (EventHandler<RobotsDotTextParseCompletedArgs>)x))
 			{
-				subscriber.BeginInvoke(this, new RobotsDotTextParseCompletedArgs(_crawlContext, robots), null, null);
+				subscriber.BeginInvoke(this, new RobotsDotTextParseCompletedArgs(CrawlContext, robots), null, null);
 			}
 		}
 
@@ -260,7 +262,7 @@ namespace Abot.Crawler
 				if (RobotsDotTextParseCompleted == null)
 					return;
 
-				RobotsDotTextParseCompleted.Invoke(this, new RobotsDotTextParseCompletedArgs(_crawlContext, robots));
+				RobotsDotTextParseCompleted.Invoke(this, new RobotsDotTextParseCompletedArgs(CrawlContext, robots));
 			}
 			catch (Exception e)
 			{

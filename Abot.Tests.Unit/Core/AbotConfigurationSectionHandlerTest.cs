@@ -1,5 +1,6 @@
 ﻿
 using Abot.Core;
+using Abot.Core.Config;
 using Abot.Poco;
 using NUnit.Framework;
 namespace Abot.Tests.Unit.Core

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Abot.Core
+namespace Abot.Core.Robots
 {
 	/// <summary>
 	/// Finds and builds the robots.txt file abstraction

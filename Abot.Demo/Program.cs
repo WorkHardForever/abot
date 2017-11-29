@@ -79,34 +79,34 @@ namespace Abot.Demo
             //For example http://a.com/ghost, would not get crawled if the link were found during the crawl.
             //If you set the log4net log level to "DEBUG" you will see a log message when any page is not allowed to be crawled.
             //NOTE: This is lambda is run after the regular ICrawlDecsionMaker.ShouldCrawlPage method is run.
-            crawler.ShouldCrawlPage((pageToCrawl, crawlContext) =>
+            crawler.ShouldCrawlPageDecisionMaker = (pageToCrawl, crawlContext) =>
             {
                 if (pageToCrawl.Uri.AbsoluteUri.Contains("ghost"))
                     return new CrawlDecision { Allow = false, Reason = "Scared of ghosts" };
 
                 return new CrawlDecision { Allow = true };
-            });
+            };
 
             //Register a lambda expression that will tell Abot to not download the page content for any page after 5th.
             //Abot will still make the http request but will not read the raw content from the stream
             //NOTE: This lambda is run after the regular ICrawlDecsionMaker.ShouldDownloadPageContent method is run
-            crawler.ShouldDownloadPageContent((crawledPage, crawlContext) =>
+            crawler.ShouldDownloadPageContentDecisionMaker = (crawledPage, crawlContext) =>
             {
                 if (crawlContext.CrawledCount >= 5)
                     return new CrawlDecision { Allow = false, Reason = "We already downloaded the raw page content for 5 pages" };
 
                 return new CrawlDecision { Allow = true };
-            });
+            };
 
             //Register a lambda expression that will tell Abot to not crawl links on any page that is not internal to the root uri.
             //NOTE: This lambda is run after the regular ICrawlDecsionMaker.ShouldCrawlPageLinks method is run
-            crawler.ShouldCrawlPageLinks((crawledPage, crawlContext) =>
+            crawler.ShouldCrawlPageLinksDecisionMaker = (crawledPage, crawlContext) =>
             {
                 if (!crawledPage.IsInternal)
                     return new CrawlDecision { Allow = false, Reason = "We don't crawl links of external pages" };
 
                 return new CrawlDecision { Allow = true };
-            });
+            };
 
             return crawler;
         }

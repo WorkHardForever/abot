@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Abot.Core;
+using Abot.Core.Repositories;
+using Abot.Core.Robots;
 using Abot.Core.Sitemap;
 using Abot.Poco;
 using Abot.Util;
@@ -12,6 +14,7 @@ using CefSharp;
 using CefSharp.OffScreen;
 using Louw.SitemapParser;
 using Robots;
+using static Abot.Poco.CrawlConfiguration;
 
 namespace Abot.Crawler
 {
@@ -27,12 +30,12 @@ namespace Abot.Crawler
 		/// <summary>
 		/// Collect sitemap from .../robots.txt
 		/// </summary>
-		protected IRobotsSitemap _rootSitemap;
+		protected IRobotsSitemap RootSitemap;
 
 		/// <summary>
 		/// Using as loading object for sitemaps
 		/// </summary>
-		protected IRobotsSitemapLoader _sitemapLoader;
+		protected IRobotsSitemapLoader SitemapLoader;
 
 		#endregion
 
@@ -64,7 +67,7 @@ namespace Abot.Crawler
 			IRobotsSitemapLoader sitemapLoader = null)
 			: base(crawlConfiguration, crawlDecisionMaker, threadManager, scheduler, pageRequester, hyperLinkParser, memoryManager, domainRateLimiter, robotsDotTextFinder)
 		{
-			_sitemapLoader = sitemapLoader ?? new RobotsSitemapLoader();
+			SitemapLoader = sitemapLoader ?? new RobotsSitemapLoader();
 		}
 
 		#endregion
@@ -88,14 +91,14 @@ namespace Abot.Crawler
 				Logger.DebugFormat("Parse sitemaps uri-s:");
 
 				// Clear depth
-				var configDepth = _crawlContext.CrawlConfiguration.MaxCrawlDepth;
-				_crawlContext.CrawlConfiguration.MaxCrawlDepth = 0;
+				var configDepth = CrawlContext.CrawlConfiguration.MaxCrawlDepth;
+				CrawlContext.CrawlConfiguration.MaxCrawlDepth = 0;
 
 				// Run robots.txt crawling
-				GetSitemapResults(_rootSitemap, cancellationTokenSource);
+				GetSitemapResults(RootSitemap, cancellationTokenSource);
 
 				// Restore user config
-				_crawlContext.CrawlConfiguration.MaxCrawlDepth = configDepth;
+				CrawlContext.CrawlConfiguration.MaxCrawlDepth = configDepth;
 			}
 
 			// Without robots.txt we can just crawl site
@@ -110,7 +113,7 @@ namespace Abot.Crawler
 			List<CrawlResult> results = new List<CrawlResult>();
 
 			if (!sitemap.IsLoaded)
-				sitemap = _sitemapLoader.Load(sitemap);
+				sitemap = SitemapLoader.Load(sitemap);
 
 			if (sitemap.Sitemaps != null && sitemap.Sitemaps.Any())
 			{
@@ -126,10 +129,10 @@ namespace Abot.Crawler
 			{
 				Logger.InfoFormat("Sitemap: {0} | Uris' count: {1}", sitemap.Location , sitemap.Items.Count());
 
-				_scheduler.Add(sitemap.Items.Select(x => new PageToCrawl(x.Location)));
+			    CrawlContext.Scheduler.Add(sitemap.Items.Select(x => new PageToCrawl(x.Location)));
 
 				CrawlResult crawlResult = new CrawlResult();
-				_crawlComplete = false;
+				CrawlComplete = false;
 				//await Task.Run(() => CrawlSite(crawlResult));
 				CrawlSite(crawlResult);
 				results.Add(crawlResult);
@@ -138,17 +141,27 @@ namespace Abot.Crawler
 			return results;
 		}
 
-		#endregion
+        #endregion
 
-		#region Protected Methods
+        #region Protected Methods
 
-		/// <summary>
-		/// Parse robots.txt sitemaps from _robotsDotText to _rootSitemap
-		/// </summary>
-		/// <returns></returns>
-		protected virtual bool TryParseRobotsSitemaps()
+        protected override void PrintConfigValues(Uri uri)
+        {
+            // Print config if depth > 0. This use if we crawl site to depth, not sitemap
+            if (IsPayAttention(CrawlContext.CrawlConfiguration.MaxCrawlDepth))
+            {
+                Logger.InfoFormat("About to crawl site [{0}]", uri.AbsoluteUri);
+                base.PrintConfigValues(uri);
+            }
+        }
+
+        /// <summary>
+        /// Parse robots.txt sitemaps from _robotsDotText to _rootSitemap
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool TryParseRobotsSitemaps()
 		{
-			IList<string> sitemaps = _robotsDotText?.Robots.GetSitemapUrls();
+			IList<string> sitemaps = RobotsDotText?.Robots.GetSitemapUrls();
 
 			// Robots.txt can collect more then 1 sitemap?
 			if (sitemaps?.Count > 0)
@@ -164,19 +177,19 @@ namespace Abot.Crawler
 				}
 
 				// Get root sitemap
-				_rootSitemap = new RobotsSitemap(
+				RootSitemap = new RobotsSitemap(
 					sitemaps: sitemaps
 						.Select(x => Uri.TryCreate(x, UriKind.Absolute, out Uri sitemapUri) ?
 							new Sitemap(sitemapUri) : null)
 						.Where(x => x != null),
-					sitemapLocation: new Uri(_robotsDotText.Robots.BaseUri, RobotsDotTextFinder.c_ROBOTS_TXT));
+					sitemapLocation: new Uri(RobotsDotText.Robots.BaseUri, Core.Robots.RobotsDotTextFinder.RobotsTxt));
 			}
 
-			return _rootSitemap?.Sitemaps != null &&
-				   _rootSitemap.Sitemaps.Any();
+			return RootSitemap?.Sitemaps != null &&
+				   RootSitemap.Sitemaps.Any();
 		}
 
-		private static ChromiumWebBrowser browser;
+		private static ChromiumWebBrowser _browser;
 
 		public static void Main(string[] args)
 		{
@@ -196,11 +209,11 @@ namespace Abot.Crawler
 			Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
 
 			// Create the offscreen Chromium browser.
-			browser = new ChromiumWebBrowser(testUrl);
+			_browser = new ChromiumWebBrowser(testUrl);
 
 			// An event that is fired when the first page is finished loading.
 			// This returns to us from another thread.
-			browser.LoadingStateChanged += BrowserLoadingStateChanged;
+			_browser.LoadingStateChanged += BrowserLoadingStateChanged;
 
 			// We have to wait for something, otherwise the process will exit too soon.
 			Console.ReadKey();
@@ -218,7 +231,7 @@ namespace Abot.Crawler
 			if (!e.IsLoading)
 			{
 				// Remove the load event handler, because we only want one snapshot of the initial page.
-				browser.LoadingStateChanged -= BrowserLoadingStateChanged;
+				_browser.LoadingStateChanged -= BrowserLoadingStateChanged;
 
 				//var scriptTask = browser.EvaluateScriptAsync("document.getElementById('lst-ib').value = 'CefSharp Was Here!'");
 

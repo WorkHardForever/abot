@@ -3,7 +3,7 @@ using Abot.Poco;
 using log4net;
 using Robots;
 
-namespace Abot.Core
+namespace Abot.Core.Robots
 {
 	/// <summary>
 	/// Wrapper for IRobot util
@@ -16,7 +16,7 @@ namespace Abot.Core
 		/// <summary>
 		/// Logger
 		/// </summary>
-		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+		protected ILog Logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
 		#endregion
 
@@ -31,13 +31,13 @@ namespace Abot.Core
 		{
 			if (rootUri == null)
 			{
-				_logger.ErrorFormat("Argument null exception: \"{0}\" is null", nameof(rootUri));
+				Logger.ErrorFormat("Argument null exception: \"{0}\" is null", nameof(rootUri));
 				throw new ArgumentNullException(nameof(rootUri));
 			}
 
 			if (content == null)
 			{
-				_logger.ErrorFormat("Argument null exception: \"{0}\" is null", nameof(content));
+				Logger.ErrorFormat("Argument null exception: \"{0}\" is null", nameof(content));
 				throw new ArgumentNullException(nameof(content));
 			}
 
@@ -77,10 +77,8 @@ namespace Abot.Core
 		/// </summary>
 		public bool IsUrlAllowed(string url, string userAgentString)
 		{
-			if (!RootUri.IsBaseOf(new Uri(url)))
-				return true;
-
-			return Robots.Allowed(url, userAgentString);
+		    return !RootUri.IsBaseOf(new Uri(url)) ||
+                    Robots.Allowed(url, userAgentString);
 		}
 
 		/// <summary>
@@ -91,10 +89,8 @@ namespace Abot.Core
 		/// <returns>True if find such user agent in content</returns>
 		public bool IsUserAgentAllowed(string userAgentString)
 		{
-			if (string.IsNullOrEmpty(userAgentString))
-				return false;
-
-			return Robots.Allowed(RootUri.AbsoluteUri, userAgentString);
+		    return !string.IsNullOrEmpty(userAgentString) &&
+                    Robots.Allowed(RootUri.AbsoluteUri, userAgentString);
 		}
 
 		#endregion
@@ -108,7 +104,7 @@ namespace Abot.Core
 		/// <param name="content"></param>
 		protected void Load(Uri rootUri, string content)
 		{
-			Robots = new Robots.Robots();
+			Robots = new global::Robots.Robots();
 			Robots.LoadContent(content, rootUri.AbsoluteUri);
 		}
 

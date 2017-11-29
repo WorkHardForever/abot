@@ -8,15 +8,15 @@ namespace Abot.Util
 	[Serializable]
 	public class CachedMemoryMonitor : IMemoryMonitor, IDisposable
 	{
-		static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
-		IMemoryMonitor _memoryMonitor;
-		Timer _usageRefreshTimer;
-		int _cachedCurrentUsageInMb;
+	    private static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+	    private IMemoryMonitor _memoryMonitor;
+	    private Timer _usageRefreshTimer;
+	    private int _cachedCurrentUsageInMb;
 
 		public CachedMemoryMonitor(IMemoryMonitor memoryMonitor, int cacheExpirationInSeconds)
 		{
 			if (memoryMonitor == null)
-				throw new ArgumentNullException("memoryMonitor");
+				throw new ArgumentNullException(nameof(memoryMonitor));
 
 			if (cacheExpirationInSeconds < 1)
 				cacheExpirationInSeconds = 5;

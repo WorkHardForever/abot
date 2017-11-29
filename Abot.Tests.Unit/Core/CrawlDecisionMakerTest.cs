@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using Abot.Core.Repositories;
 
 namespace Abot.Tests.Unit.Core
 {

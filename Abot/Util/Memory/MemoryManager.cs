@@ -11,13 +11,13 @@ namespace Abot.Util
 	[Serializable]
 	public class MemoryManager : IMemoryManager
 	{
-		static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
-		IMemoryMonitor _memoryMonitor;
+	    private static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+	    private IMemoryMonitor _memoryMonitor;
 
 		public MemoryManager(IMemoryMonitor memoryMonitor)
 		{
 			if (memoryMonitor == null)
-				throw new ArgumentNullException("memoryMonitor");
+				throw new ArgumentNullException(nameof(memoryMonitor));
 
 			_memoryMonitor = memoryMonitor;
 		}
@@ -34,10 +34,10 @@ namespace Abot.Util
 
 			bool isAvailable = true;
 
-			MemoryFailPoint _memoryFailPoint = null;
+			MemoryFailPoint memoryFailPoint = null;
 			try
 			{
-				_memoryFailPoint = new MemoryFailPoint(sizeInMb);
+				memoryFailPoint = new MemoryFailPoint(sizeInMb);
 			}
 			catch (InsufficientMemoryException)
 			{
@@ -49,8 +49,8 @@ namespace Abot.Util
 			}
 			finally
 			{
-				if (_memoryFailPoint != null)
-					_memoryFailPoint.Dispose();
+				if (memoryFailPoint != null)
+					memoryFailPoint.Dispose();
 			}
 
 			return isAvailable;

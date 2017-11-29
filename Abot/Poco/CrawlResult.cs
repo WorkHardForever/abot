@@ -20,11 +20,6 @@ namespace Abot.Poco
 		#region Public Variables
 
 		/// <summary>
-		/// The root of the crawl
-		/// </summary>
-		public Uri RootUri { get; set; }
-
-		/// <summary>
 		/// The amount of time that elapsed before the crawl completed
 		/// </summary>
 		public TimeSpan Elapsed { get; set; }

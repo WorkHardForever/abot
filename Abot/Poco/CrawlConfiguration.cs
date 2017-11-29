@@ -9,9 +9,13 @@ namespace Abot.Poco
 	[Serializable]
 	public class CrawlConfiguration
 	{
-		#region Const
+        #region Const
 
-		private const string c_LOGGER_NAME_DEFAULT = "AbotLogger";
+        /// <summary>
+        /// Many config values start work, when its more then zero
+        /// </summary>
+        private const int NotPayAttention = 0;
+        private const string LoggerNameDefault = "AbotLogger";
 
 		#endregion
 
@@ -21,7 +25,7 @@ namespace Abot.Poco
 		/// Configure base functionality
 		/// </summary>
 		public CrawlConfiguration()
-			: this(loggerName: c_LOGGER_NAME_DEFAULT)
+			: this(loggerName: LoggerNameDefault)
 		{ }
 
 		/// <summary>
@@ -53,17 +57,32 @@ namespace Abot.Poco
 		/// <summary>
 		/// Logger name
 		/// </summary>
-		public static string LoggerName { get; private set; } = c_LOGGER_NAME_DEFAULT;
+		public static string LoggerName { get; private set; } = LoggerNameDefault;
 
-		#endregion
+        #endregion
 
-		#region Crawl Behavior
+	    #region Public Static Variable
 
-		/// <summary>
-		/// Max concurrent threads to use for http requests
-		/// Default: 10
-		/// </summary>
-		public int MaxConcurrentThreads { get; set; }
+        /// <summary>
+        /// Compare Value > notPayAttention. Many config values start work, when its more then zero
+        /// </summary>
+        /// <param name="value">Config argument</param>
+        /// <param name="notPayAttention">Min value that method get false. Usual it's zero</param>
+        /// <returns>Bool</returns>
+        public static bool IsPayAttention(int value, int notPayAttention = NotPayAttention)
+	    {
+	        return value > notPayAttention;
+	    }
+
+	    #endregion
+
+        #region Crawl Behavior
+
+        /// <summary>
+        /// Max concurrent threads to use for http requests
+        /// Default: 10
+        /// </summary>
+        public int MaxConcurrentThreads { get; set; }
 
 		/// <summary>
 		/// Maximum number of pages to crawl. 

@@ -1,7 +1,7 @@
 ﻿using System;
 using Abot.Poco;
 
-namespace Abot.Core
+namespace Abot.Core.Repositories
 {
 	/// <summary>
 	/// Repository with pages' queue for next crawling

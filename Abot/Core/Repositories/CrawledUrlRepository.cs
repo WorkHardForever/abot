@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Abot.Core
+namespace Abot.Core.Repositories
 {
 	/// <summary>
 	/// Implementation that stores a numeric hash of the url instead of the url itself

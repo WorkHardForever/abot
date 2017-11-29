@@ -1,6 +1,6 @@
 ﻿using Robots;
 
-namespace Abot.Core
+namespace Abot.Core.Robots
 {
 	/// <summary>
 	/// Wrapper for IRobot util

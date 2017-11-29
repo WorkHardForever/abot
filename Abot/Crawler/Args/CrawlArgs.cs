@@ -11,7 +11,7 @@ namespace Abot.Crawler
         public CrawlArgs(CrawlContext crawlContext)
         {
             if (crawlContext == null)
-                throw new ArgumentNullException("crawlContext");
+                throw new ArgumentNullException(nameof(crawlContext));
 
             CrawlContext = crawlContext;
         }

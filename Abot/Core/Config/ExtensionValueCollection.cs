@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace Abot.Core
+namespace Abot.Core.Config
 {
 	/// <summary>
 	/// Collection of extension elements from extension section
@@ -16,7 +16,7 @@ namespace Abot.Core
 		/// </summary>
 		/// <param name="index">int index</param>
 		/// <returns>finded ExtensionValueElement by index</returns>
-		public ExtensionValueElement this[int index] { get { return (ExtensionValueElement)BaseGet(index); } }
+		public ExtensionValueElement this[int index] => (ExtensionValueElement)BaseGet(index);
 
 		#endregion
 

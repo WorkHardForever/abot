@@ -12,7 +12,7 @@ namespace Abot.Crawler
             : base(crawlContext)
         {
             if (pageToCrawl == null)
-                throw new ArgumentNullException("pageToCrawl");
+                throw new ArgumentNullException(nameof(pageToCrawl));
 
             PageToCrawl = pageToCrawl;
         }

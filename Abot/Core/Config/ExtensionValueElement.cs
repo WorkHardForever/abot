@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace Abot.Core
+namespace Abot.Core.Config
 {
 	/// <summary>
 	/// Extension section
@@ -15,13 +15,13 @@ namespace Abot.Core
 		/// Key
 		/// </summary>
 		[ConfigurationProperty("key", IsRequired = false, IsKey = true)]
-		public string Key { get { return (string)this["key"]; } }
+		public string Key => (string)this["key"];
 
 		/// <summary>
 		/// Value of Key
 		/// </summary>
 		[ConfigurationProperty("value", IsRequired = false, IsKey = false)]
-		public string Value { get { return (string)this["value"]; } }
+		public string Value => (string)this["value"];
 
 		#endregion
 	}

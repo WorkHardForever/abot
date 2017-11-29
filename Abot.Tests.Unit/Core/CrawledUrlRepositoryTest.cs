@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Abot.Core.Repositories;
 
 namespace Abot.Tests.Unit.Core
 {

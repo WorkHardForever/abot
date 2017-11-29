@@ -12,7 +12,7 @@ namespace Abot.Crawler
             : base(crawlContext, pageToCrawl)
         {
             if (string.IsNullOrWhiteSpace(disallowedReason))
-                throw new ArgumentNullException("disallowedReason");
+                throw new ArgumentNullException(nameof(disallowedReason));
 
             DisallowedReason = disallowedReason;
         }

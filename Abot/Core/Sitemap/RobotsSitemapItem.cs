@@ -5,25 +5,25 @@ namespace Abot.Core.Sitemap
 {
 	public class RobotsSitemapItem : IRobotsSitemapItem
 	{
-		private readonly SitemapItem AdapteeObject;
+		private readonly SitemapItem _adapteeObject;
 
 		public RobotsSitemapItem(SitemapItem adapteeObject)
 		{
-			AdapteeObject = adapteeObject;
+			_adapteeObject = adapteeObject;
 		}
 
-		public Uri Location => AdapteeObject.Location;
+		public Uri Location => _adapteeObject.Location;
 
-		public DateTime? LastModified => AdapteeObject.LastModified;
+		public DateTime? LastModified => _adapteeObject.LastModified;
 
 		public RobotsSitemapChangeFrequency? ChangeFrequency =>
-			(RobotsSitemapChangeFrequency?)(int?)AdapteeObject.ChangeFrequency;
+			(RobotsSitemapChangeFrequency?)(int?)_adapteeObject.ChangeFrequency;
 
-		public double? Priority => AdapteeObject.Priority;
+		public double? Priority => _adapteeObject.Priority;
 
 		public static SitemapItem MapIRobotsSitemapToSitemap(IRobotsSitemapItem robotsSitemapItem)
 		{
-			return (robotsSitemapItem as RobotsSitemapItem)?.AdapteeObject;
+			return (robotsSitemapItem as RobotsSitemapItem)?._adapteeObject;
 		}
 	}
 }

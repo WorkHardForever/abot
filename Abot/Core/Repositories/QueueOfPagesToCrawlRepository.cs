@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using Abot.Poco;
 
-namespace Abot.Core
+namespace Abot.Core.Repositories
 {
 	/// <summary>
 	/// Repository with pages' queue for next crawling
@@ -12,7 +12,7 @@ namespace Abot.Core
 	{
 		#region Private field
 
-		ConcurrentQueue<PageToCrawl> _urlQueue = new ConcurrentQueue<PageToCrawl>();
+	    private ConcurrentQueue<PageToCrawl> _urlQueue = new ConcurrentQueue<PageToCrawl>();
 
 		#endregion
 

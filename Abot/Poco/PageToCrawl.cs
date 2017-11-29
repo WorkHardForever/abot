@@ -15,7 +15,7 @@ namespace Abot.Poco
 		/// <summary>
 		/// Logger
 		/// </summary>
-		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+		protected ILog Logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
 		#endregion
 
@@ -34,7 +34,7 @@ namespace Abot.Poco
 		{
 			if (uri == null)
 			{
-				_logger.FatalFormat("Null argument exception");
+				Logger.FatalFormat("Null argument exception");
 				throw new ArgumentNullException(nameof(uri));
 			}
 

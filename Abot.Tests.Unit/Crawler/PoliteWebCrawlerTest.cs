@@ -6,6 +6,8 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Abot.Core.Repositories;
+using Abot.Core.Robots;
 
 namespace Abot.Tests.Unit.Crawler
 {

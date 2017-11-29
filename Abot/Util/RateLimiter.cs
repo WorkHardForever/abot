@@ -104,7 +104,7 @@ namespace Abot.Util
 		public bool WaitToProceed(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < -1)
-				throw new ArgumentOutOfRangeException("millisecondsTimeout");
+				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
 			CheckDisposed();
 

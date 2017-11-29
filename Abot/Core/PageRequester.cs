@@ -14,7 +14,7 @@ namespace Abot.Core
 		#region Const
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-		protected const string c_ACCEPT_REQUEST = "*/*";
+		protected const string CAcceptRequest = "*/*";
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 		#endregion
@@ -24,20 +24,20 @@ namespace Abot.Core
 		/// <summary>
 		/// Logger
 		/// </summary>
-		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+		protected ILog Logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
 		/// <summary>
 		/// Config with all options to get page or miss it
 		/// </summary>
-		protected CrawlConfiguration _config;
+		protected CrawlConfiguration Config;
 
 
-		protected IWebContentExtractor _extractor;
+		protected IWebContentExtractor Extractor;
 
 		/// <summary>
 		/// Cookie of responsed page
 		/// </summary>
-		protected CookieContainer _cookieContainer = new CookieContainer();
+		protected CookieContainer CookieContainer = new CookieContainer();
 
 		#endregion
 
@@ -58,14 +58,14 @@ namespace Abot.Core
 		/// <param name="contentExtractor"></param>
 		public PageRequester(CrawlConfiguration config, IWebContentExtractor contentExtractor)
 		{
-			_config = config ?? throw new ArgumentNullException(nameof(config));
-			_extractor = contentExtractor ?? new WebContentExtractor();
+			Config = config ?? throw new ArgumentNullException(nameof(config));
+			Extractor = contentExtractor ?? new WebContentExtractor();
 
 			// Set ServicePointManager credentials
-			if (_config.HttpServicePointConnectionLimit > 0)
-				ServicePointManager.DefaultConnectionLimit = _config.HttpServicePointConnectionLimit;
+			if (Config.HttpServicePointConnectionLimit > 0)
+				ServicePointManager.DefaultConnectionLimit = Config.HttpServicePointConnectionLimit;
 
-			if (!_config.IsSslCertificateValidationEnabled)
+			if (!Config.IsSslCertificateValidationEnabled)
 				ServicePointManager.ServerCertificateValidationCallback +=
 					(sender, certificate, chain, sslPolicyErrors) => true;
 		}
@@ -110,13 +110,13 @@ namespace Abot.Core
 				if (e.Response != null)
 					response = (HttpWebResponse)e.Response;
 
-				_logger.DebugFormat("Error occurred requesting url [{0}]", uri.AbsoluteUri);
-				_logger.Debug(e);
+				Logger.DebugFormat("Error occurred requesting url [{0}]", uri.AbsoluteUri);
+				Logger.Debug(e);
 			}
 			catch (Exception e)
 			{
-				_logger.DebugFormat("Error occurred requesting url [{0}]", uri.AbsoluteUri);
-				_logger.Debug(e);
+				Logger.DebugFormat("Error occurred requesting url [{0}]", uri.AbsoluteUri);
+				Logger.Debug(e);
 			}
 			finally
 			{
@@ -134,12 +134,12 @@ namespace Abot.Core
 						{
 							crawledPage.DownloadContentStarted = DateTime.Now;
 							// Collect useful info from page
-							crawledPage.Content = _extractor.GetContent(response);
+							crawledPage.Content = Extractor.GetContent(response);
 							crawledPage.DownloadContentCompleted = DateTime.Now;
 						}
 						else
 						{
-							_logger.DebugFormat("Links on page [{0}] not crawled, [{1}]", crawledPage.Uri.AbsoluteUri, shouldDownloadContentDecision.Reason);
+							Logger.DebugFormat("Links on page [{0}] not crawled, [{1}]", crawledPage.Uri.AbsoluteUri, shouldDownloadContentDecision.Reason);
 						}
 
 						// Should already be closed by _extractor but just being safe
@@ -148,8 +148,8 @@ namespace Abot.Core
 				}
 				catch (Exception e)
 				{
-					_logger.DebugFormat("Error occurred finalizing requesting url [{0}]", uri.AbsoluteUri);
-					_logger.Debug(e);
+					Logger.DebugFormat("Error occurred finalizing requesting url [{0}]", uri.AbsoluteUri);
+					Logger.Debug(e);
 				}
 			}
 
@@ -161,8 +161,8 @@ namespace Abot.Core
 		/// </summary>
 		public void Dispose()
 		{
-			_cookieContainer = null;
-			_config = null;
+			CookieContainer = null;
+			Config = null;
 		}
 
 		#endregion
@@ -178,21 +178,21 @@ namespace Abot.Core
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
 
-			request.AllowAutoRedirect = _config.IsHttpRequestAutoRedirectsEnabled;
-			request.UserAgent = _config.UserAgentString;
-			request.Accept = c_ACCEPT_REQUEST;
+			request.AllowAutoRedirect = Config.IsHttpRequestAutoRedirectsEnabled;
+			request.UserAgent = Config.UserAgentString;
+			request.Accept = CAcceptRequest;
 
-			if (_config.HttpRequestMaxAutoRedirects > 0)
-				request.MaximumAutomaticRedirections = _config.HttpRequestMaxAutoRedirects;
+			if (Config.HttpRequestMaxAutoRedirects > 0)
+				request.MaximumAutomaticRedirections = Config.HttpRequestMaxAutoRedirects;
 
-			if (_config.IsHttpRequestAutomaticDecompressionEnabled)
+			if (Config.IsHttpRequestAutomaticDecompressionEnabled)
 				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
-			if (_config.HttpRequestTimeoutInSeconds > 0)
-				request.Timeout = _config.HttpRequestTimeoutInSeconds * 1000;
+			if (Config.HttpRequestTimeoutInSeconds > 0)
+				request.Timeout = Config.HttpRequestTimeoutInSeconds * 1000;
 
-			if (_config.IsSendingCookiesEnabled)
-				request.CookieContainer = _cookieContainer;
+			if (Config.IsSendingCookiesEnabled)
+				request.CookieContainer = CookieContainer;
 
 			//Supposedly this does not work... https://github.com/sjdirect/abot/issues/122
 			//if (_config.IsAlwaysLogin)
@@ -200,10 +200,10 @@ namespace Abot.Core
 			//    request.Credentials = new NetworkCredential(_config.LoginUser, _config.LoginPassword);
 			//    request.UseDefaultCredentials = false;
 			//}
-			if (_config.IsAlwaysLogin)
+			if (Config.IsAlwaysLogin)
 			{
 				string credentials = Convert.ToBase64String(
-					System.Text.Encoding.ASCII.GetBytes(_config.LoginUser + ":" + _config.LoginPassword)
+					System.Text.Encoding.ASCII.GetBytes(Config.LoginUser + ":" + Config.LoginPassword)
 				);
 
 				request.Headers[HttpRequestHeader.Authorization] = "Basic " + credentials;
@@ -218,10 +218,10 @@ namespace Abot.Core
 		/// <param name="response"></param>
 		protected virtual void ProcessResponseObject(HttpWebResponse response)
 		{
-			if (response != null && _config.IsSendingCookiesEnabled)
+			if (response != null && Config.IsSendingCookiesEnabled)
 			{
 				CookieCollection cookies = response.Cookies;
-				_cookieContainer.Add(cookies);
+				CookieContainer.Add(cookies);
 			}
 		}
 

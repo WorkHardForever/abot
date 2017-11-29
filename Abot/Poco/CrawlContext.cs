@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Dynamic;
 using System.Threading;
 using Abot.Core;
+using Abot.Core.Repositories;
 
 namespace Abot.Poco
 {
@@ -10,7 +11,7 @@ namespace Abot.Poco
 	/// Context of WebCrawler. Contains all functionality of crawling
 	/// </summary>
 	[Serializable]
-	public class CrawlContext
+	public class CrawlContext : IDisposable
 	{
 		#region Ctor
 
@@ -21,7 +22,6 @@ namespace Abot.Poco
 		{
 			CrawlCountByDomain = new ConcurrentDictionary<string, int>();
 			CancellationTokenSource = new CancellationTokenSource();
-			CrawlBag = new ExpandoObject();
 		}
 
 		#endregion
@@ -65,11 +65,6 @@ namespace Abot.Poco
 		public IScheduler Scheduler { get; set; }
 
 		/// <summary>
-		/// Random dynamic values
-		/// </summary>
-		public dynamic CrawlBag { get; set; }
-
-		/// <summary>
 		/// Whether a request to stop the crawl has happened.
 		/// Will clear all scheduled pages but will allow any threads that are currently crawling to complete.
 		/// </summary>
@@ -98,5 +93,11 @@ namespace Abot.Poco
 		public CancellationTokenSource CancellationTokenSource { get; set; }
 
 		#endregion
+
+	    public void Dispose()
+	    {
+	        Scheduler?.Dispose();
+	        CancellationTokenSource?.Dispose();
+	    }
 	}
 }

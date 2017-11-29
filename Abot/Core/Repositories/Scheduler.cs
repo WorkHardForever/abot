@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Abot.Poco;
 
-namespace Abot.Core
+namespace Abot.Core.Repositories
 {
 	/// <summary>
 	/// Handles managing the priority of what pages need to be crawled
@@ -15,17 +15,17 @@ namespace Abot.Core
 		/// <summary>
 		/// Crawled url repository
 		/// </summary>
-		protected ICrawledUrlRepository _crawledUrlRepository;
+		protected ICrawledUrlRepository CrawledUrlRepository;
 
 		/// <summary>
 		/// Pages to crawl repository
 		/// </summary>
-		protected IQueueOfPagesToCrawlRepository _pagesToCrawlRepository;
+		protected IQueueOfPagesToCrawlRepository PagesToCrawlRepository;
 
 		/// <summary>
 		/// Allow crawl this uri again if something was fail?
 		/// </summary>
-		protected bool _allowUriRecrawling;
+		protected bool AllowUriRecrawling;
 
 		#endregion
 
@@ -34,7 +34,7 @@ namespace Abot.Core
 		/// <summary>
 		/// Count of remaining items that are currently scheduled
 		/// </summary>
-		public int Count { get { return _pagesToCrawlRepository.Count(); } }
+		public int Count => PagesToCrawlRepository.Count();
 
 		#endregion
 
@@ -58,9 +58,9 @@ namespace Abot.Core
 						 ICrawledUrlRepository crawledUrlRepository,
 						 IQueueOfPagesToCrawlRepository pagesToCrawlRepository)
 		{
-			_allowUriRecrawling = allowUriRecrawling;
-			_crawledUrlRepository = crawledUrlRepository ?? new CompactCrawledUrlRepository();
-			_pagesToCrawlRepository = pagesToCrawlRepository ?? new QueueOfPagesToCrawlRepository();
+			AllowUriRecrawling = allowUriRecrawling;
+			CrawledUrlRepository = crawledUrlRepository ?? new CompactCrawledUrlRepository();
+			PagesToCrawlRepository = pagesToCrawlRepository ?? new QueueOfPagesToCrawlRepository();
 		}
 
 		#endregion
@@ -73,16 +73,16 @@ namespace Abot.Core
 		public void Add(PageToCrawl page)
 		{
 			if (page == null)
-				throw new ArgumentNullException("page");
+				throw new ArgumentNullException(nameof(page));
 
-			if (_allowUriRecrawling || page.IsRetry)
+			if (AllowUriRecrawling || page.IsRetry)
 			{
-				_pagesToCrawlRepository.Add(page);
+				PagesToCrawlRepository.Add(page);
 			}
 			else
 			{
-				if (_crawledUrlRepository.AddIfNew(page.Uri))
-					_pagesToCrawlRepository.Add(page);
+				if (CrawledUrlRepository.AddIfNew(page.Uri))
+					PagesToCrawlRepository.Add(page);
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace Abot.Core
 		public void Add(IEnumerable<PageToCrawl> pages)
 		{
 			if (pages == null)
-				throw new ArgumentNullException("pages");
+				throw new ArgumentNullException(nameof(pages));
 
 			foreach (PageToCrawl page in pages)
 				Add(page);
@@ -103,7 +103,7 @@ namespace Abot.Core
 		/// </summary>
 		public PageToCrawl GetNext()
 		{
-			return _pagesToCrawlRepository.GetNext();
+			return PagesToCrawlRepository.GetNext();
 		}
 
 		/// <summary>
@@ -111,7 +111,7 @@ namespace Abot.Core
 		/// </summary>
 		public void Clear()
 		{
-			_pagesToCrawlRepository.Clear();
+			PagesToCrawlRepository.Clear();
 		}
 
 		/// <summary>
@@ -120,7 +120,7 @@ namespace Abot.Core
 		/// <param name="uri"></param>
 		public void AddKnownUri(Uri uri)
 		{
-			_crawledUrlRepository.AddIfNew(uri);
+			CrawledUrlRepository.AddIfNew(uri);
 		}
 
 		/// <summary>
@@ -129,7 +129,7 @@ namespace Abot.Core
 		/// </summary>
 		public bool IsUriKnown(Uri uri)
 		{
-			return _crawledUrlRepository.Contains(uri);
+			return CrawledUrlRepository.Contains(uri);
 		}
 
 		/// <summary>
@@ -137,14 +137,8 @@ namespace Abot.Core
 		/// </summary>
 		public void Dispose()
 		{
-			if (_crawledUrlRepository != null)
-			{
-				_crawledUrlRepository.Dispose();
-			}
-			if (_pagesToCrawlRepository != null)
-			{
-				_pagesToCrawlRepository.Dispose();
-			}
+		    CrawledUrlRepository?.Dispose();
+		    PagesToCrawlRepository?.Dispose();
 		}
 
 		#endregion

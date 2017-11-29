@@ -1,6 +1,7 @@
 ﻿using Abot.Core;
 using NUnit.Framework;
 using System;
+using Abot.Core.Parsers;
 using Abot.Poco;
 
 namespace Abot.Tests.Unit.Core

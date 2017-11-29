@@ -54,20 +54,20 @@ namespace Abot.Poco
 		/// Lazy loaded Html Agility Pack (http://htmlagilitypack.codeplex.com/)
 		/// document that can be used to retrieve/modify html elements on the crawled page.
 		/// </summary>
-		public HtmlDocument HtmlDocument { get { return _htmlDocument.Value; } }
+		public HtmlDocument HtmlDocument => _htmlDocument.Value;
 
 		/// <summary>
 		/// Lazy loaded CsQuery (https://github.com/jamietre/CsQuery)
 		/// document that can be used to retrieve/modify html elements on the crawled page.
 		/// </summary>
 		[Obsolete("CSQuery is no longer actively maintained. Use AngleSharpHyperlinkParser for similar usage/functionality")]
-		public CQ CsQueryDocument { get { return _csQueryDocument.Value; } }
+		public CQ CsQueryDocument => _csQueryDocument.Value;
 
 		/// <summary>
 		/// Lazy loaded AngleSharp IHtmlDocument (https://github.com/AngleSharp/AngleSharp)
 		/// that can be used to retrieve/modify html elements on the crawled page.
 		/// </summary>
-		public IHtmlDocument AngleSharpHtmlDocument { get { return _angleSharpHtmlDocument.Value; } }
+		public IHtmlDocument AngleSharpHtmlDocument => _angleSharpHtmlDocument.Value;
 
 		/// <summary>
 		/// Web request sent to the server
@@ -136,7 +136,7 @@ namespace Abot.Poco
 		/// <summary>
 		/// Time it took from RequestStarted to RequestCompleted in milliseconds
 		/// </summary>
-		public double Elapsed { get { return (RequestCompleted - RequestStarted).TotalMilliseconds; } }
+		public double Elapsed => (RequestCompleted - RequestStarted).TotalMilliseconds;
 
 		#endregion
 
@@ -169,8 +169,8 @@ namespace Abot.Poco
 			{
 				csQueryObject = CQ.Create("");
 
-				_logger.ErrorFormat("Error occurred while loading CsQuery object for Url [{0}]", Uri);
-				_logger.Error(e);
+				Logger.ErrorFormat("Error occurred while loading CsQuery object for Url [{0}]", Uri);
+				Logger.Error(e);
 			}
 
 			return csQueryObject;
@@ -192,8 +192,8 @@ namespace Abot.Poco
 			{
 				hapDoc.LoadHtml("");
 
-				_logger.ErrorFormat("Error occurred while loading HtmlAgilityPack object for Url [{0}]", Uri);
-				_logger.Error(e);
+				Logger.ErrorFormat("Error occurred while loading HtmlAgilityPack object for Url [{0}]", Uri);
+				Logger.Error(e);
 			}
 
 			return hapDoc;
@@ -213,8 +213,8 @@ namespace Abot.Poco
 			{
 				document = _angleSharpHtmlParser.Parse("");
 
-				_logger.ErrorFormat("Error occurred while loading AngularSharp object for Url [{0}]", Uri);
-				_logger.Error(e);
+				Logger.ErrorFormat("Error occurred while loading AngularSharp object for Url [{0}]", Uri);
+				Logger.Error(e);
 			}
 
 			return document;

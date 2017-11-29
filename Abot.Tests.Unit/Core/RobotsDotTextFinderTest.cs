@@ -3,6 +3,7 @@ using Abot.Poco;
 using Moq;
 using NUnit.Framework;
 using System;
+using Abot.Core.Robots;
 
 namespace Abot.Tests.Unit.Core
 {
@@ -14,7 +15,7 @@ namespace Abot.Tests.Unit.Core
         CrawledPage _goodPageResult;
         CrawledPage _badPageResult;
 
-        [TestFixtureSetUp]
+        //[TestFixtureSetUp]
         public void TestFixtureSetup()
         {
             PageRequester pageRequster = new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" });

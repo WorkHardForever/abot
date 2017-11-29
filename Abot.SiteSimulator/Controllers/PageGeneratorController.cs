@@ -35,7 +35,7 @@ namespace Abot.SiteSimulator.Controllers
         public ActionResult Generate(PageSpecs pageSpecs)
         {
             if (pageSpecs == null)
-                throw new ArgumentNullException("pageSpecs");
+                throw new ArgumentNullException(nameof(pageSpecs));
 
             if (pageSpecs.Status200Count < 0)
                 throw new ArgumentException("pageSpecs.Status200 cannot be negative");

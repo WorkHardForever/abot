@@ -1,6 +1,7 @@
 ﻿using Abot.Core;
 using NUnit.Framework;
 using System;
+using Abot.Core.Parsers;
 using Abot.Poco;
 
 namespace Abot.Tests.Unit.Core
@@ -10,7 +11,7 @@ namespace Abot.Tests.Unit.Core
     {
         protected override HyperLinkParser GetInstance(bool isRespectMetaRobotsNoFollowEnabled, bool isRespectAnchorRelNoFollowEnabled, Func<string, string> cleanUrlDelegate, bool isRespectUrlNamedAnchorOrHashbangEnabled, bool isHttpXRobotsTagHeaderNoFollowEnabled)
         {
-            return new CSQueryHyperlinkParser(new CrawlConfiguration
+            return new CsQueryHyperlinkParser(new CrawlConfiguration
             {
                 IsRespectMetaRobotsNoFollowEnabled = isRespectMetaRobotsNoFollowEnabled,
                 IsRespectAnchorRelNoFollowEnabled = isRespectAnchorRelNoFollowEnabled,
@@ -23,7 +24,7 @@ namespace Abot.Tests.Unit.Core
         [Test]
         public void Constructor()
         {
-            new CSQueryHyperlinkParser();
+            new CsQueryHyperlinkParser();
         }
     }
 }

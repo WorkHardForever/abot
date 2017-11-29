@@ -18,11 +18,11 @@ namespace Abot.Core
 		/// <summary>
 		/// Logger
 		/// </summary>
-		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+		protected ILog Logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
-		protected ConcurrentDictionary<string, IRateLimiter> _rateLimiterLookup = new ConcurrentDictionary<string, IRateLimiter>();
+		protected ConcurrentDictionary<string, IRateLimiter> RateLimiterLookup = new ConcurrentDictionary<string, IRateLimiter>();
 
-		protected long _defaultMinCrawlDelayInMillisecs;
+		protected long DefaultMinCrawlDelayInMillisecs;
 
 		#endregion
 
@@ -35,7 +35,7 @@ namespace Abot.Core
 
 			// IRateLimiter is always a little under so adding a little more time
 			if (minCrawlDelayMillisecs > 0)
-				_defaultMinCrawlDelayInMillisecs = minCrawlDelayMillisecs + 20;
+				DefaultMinCrawlDelayInMillisecs = minCrawlDelayMillisecs + 20;
 		}
 
 		#endregion
@@ -49,9 +49,9 @@ namespace Abot.Core
 		public void RateLimit(Uri uri)
 		{
 			if (uri == null)
-				throw new ArgumentNullException("uri");
+				throw new ArgumentNullException(nameof(uri));
 
-			IRateLimiter rateLimiter = GetRateLimiter(uri, _defaultMinCrawlDelayInMillisecs);
+			IRateLimiter rateLimiter = GetRateLimiter(uri, DefaultMinCrawlDelayInMillisecs);
 			if (rateLimiter == null)
 				return;
 
@@ -60,7 +60,7 @@ namespace Abot.Core
 			timer.Stop();
 
 			if (timer.ElapsedMilliseconds > 10)
-				_logger.DebugFormat("Rate limited [{0}] [{1}] milliseconds", uri.AbsoluteUri, timer.ElapsedMilliseconds);
+				Logger.DebugFormat("Rate limited [{0}] [{1}] milliseconds", uri.AbsoluteUri, timer.ElapsedMilliseconds);
 		}
 
 		/// <summary>
@@ -76,7 +76,7 @@ namespace Abot.Core
 				throw new ArgumentException($"{nameof(minCrawlDelayInMillisecs)} can't be < 1");
 
 			// just calling this method adds the new domain
-			GetRateLimiter(uri, Math.Max(minCrawlDelayInMillisecs, _defaultMinCrawlDelayInMillisecs));
+			GetRateLimiter(uri, Math.Max(minCrawlDelayInMillisecs, DefaultMinCrawlDelayInMillisecs));
 		}
 
 		/// <summary>
@@ -91,13 +91,13 @@ namespace Abot.Core
 			if (minCrawlDelayInMillisecs < 1)
 				throw new ArgumentException(nameof(minCrawlDelayInMillisecs));
 
-			var delayToUse = Math.Max(minCrawlDelayInMillisecs, _defaultMinCrawlDelayInMillisecs);
+			var delayToUse = Math.Max(minCrawlDelayInMillisecs, DefaultMinCrawlDelayInMillisecs);
 			if (delayToUse > 0)
 			{
 				var rateLimiter = new RateLimiter(1, TimeSpan.FromMilliseconds(delayToUse));
 
-				_rateLimiterLookup.AddOrUpdate(uri.Authority, rateLimiter, (key, oldValue) => rateLimiter);
-				_logger.DebugFormat("Added/updated domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, delayToUse);
+				RateLimiterLookup.AddOrUpdate(uri.Authority, rateLimiter, (key, oldValue) => rateLimiter);
+				Logger.DebugFormat("Added/updated domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, delayToUse);
 			}
 		}
 
@@ -106,7 +106,7 @@ namespace Abot.Core
 		/// </summary>
 		public void RemoveDomain(Uri uri)
 		{
-			_rateLimiterLookup.TryRemove(uri.Authority, out IRateLimiter rateLimiter);
+			RateLimiterLookup.TryRemove(uri.Authority, out IRateLimiter rateLimiter);
 		}
 
 		#endregion
@@ -115,16 +115,16 @@ namespace Abot.Core
 
 		private IRateLimiter GetRateLimiter(Uri uri, long minCrawlDelayInMillisecs)
 		{
-			_rateLimiterLookup.TryGetValue(uri.Authority, out IRateLimiter rateLimiter);
+			RateLimiterLookup.TryGetValue(uri.Authority, out IRateLimiter rateLimiter);
 
 			if (rateLimiter == null && minCrawlDelayInMillisecs > 0)
 			{
 				rateLimiter = new RateLimiter(1, TimeSpan.FromMilliseconds(minCrawlDelayInMillisecs));
 
-				if (_rateLimiterLookup.TryAdd(uri.Authority, rateLimiter))
-					_logger.DebugFormat("Added new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
+				if (RateLimiterLookup.TryAdd(uri.Authority, rateLimiter))
+					Logger.DebugFormat("Added new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
 				else
-					_logger.WarnFormat("Unable to add new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
+					Logger.WarnFormat("Unable to add new domain [{0}] with minCrawlDelayInMillisecs of [{1}] milliseconds", uri.Authority, minCrawlDelayInMillisecs);
 			}
 
 			return rateLimiter;

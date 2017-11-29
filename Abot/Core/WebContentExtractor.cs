@@ -19,7 +19,7 @@ namespace Abot.Core
 		/// <summary>
 		/// Find expression from : http://stackoverflow.com/questions/3458217/how-to-use-regular-expression-to-match-the-charset-string-in-html
 		/// </summary>
-		protected const string c_REGULAR_CHARSET = @"<meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s""']*)?([^>]*?)[\s""';]*charset\s*=[\s""']*([^\s""'/>]*)";
+		protected const string CRegularCharset = @"<meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s""']*)?([^>]*?)[\s""';]*charset\s*=[\s""']*([^\s""'/>]*)";
 
 		#endregion
 
@@ -28,7 +28,7 @@ namespace Abot.Core
 		/// <summary>
 		/// Logger
 		/// </summary>
-		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+		protected ILog Logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
 		#endregion
 
@@ -113,7 +113,7 @@ namespace Abot.Core
 
 			if (body != null)
 			{
-				Match match = Regex.Match(body, c_REGULAR_CHARSET, RegexOptions.IgnoreCase);
+				Match match = Regex.Match(body, CRegularCharset, RegexOptions.IgnoreCase);
 				if (match.Success)
 				{
 					charset = string.IsNullOrWhiteSpace(match.Groups[2].Value) ?
@@ -142,7 +142,7 @@ namespace Abot.Core
 				}
 				catch (Exception e)
 				{
-					_logger.Error(e);
+					Logger.Error(e);
 					throw e;
 				}
 			}
@@ -188,8 +188,8 @@ namespace Abot.Core
 			}
 			catch (Exception e)
 			{
-				_logger.WarnFormat("Error occurred while downloading content of url {0}", response.ResponseUri.AbsoluteUri);
-				_logger.Warn(e);
+				Logger.WarnFormat("Error occurred while downloading content of url {0}", response.ResponseUri.AbsoluteUri);
+				Logger.Warn(e);
 			}
 
 			return rawData;

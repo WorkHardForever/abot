@@ -8,7 +8,7 @@ namespace Abot.Util
 	[Serializable]
 	public class GcMemoryMonitor : IMemoryMonitor
 	{
-		static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+	    private static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 
 		public virtual int GetCurrentUsageInMb()
 		{

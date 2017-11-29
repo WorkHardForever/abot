@@ -2,6 +2,7 @@
 using Abot.Poco;
 using NUnit.Framework;
 using System;
+using Abot.Core.Repositories;
 
 namespace Abot.Tests.Unit.Core
 {

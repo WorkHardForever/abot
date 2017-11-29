@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Abot.Core
+namespace Abot.Core.Repositories
 {
 	/// <summary>
 	/// Contract to stores crawled urls

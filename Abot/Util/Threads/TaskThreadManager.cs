@@ -10,7 +10,7 @@ namespace Abot.Util
     [Serializable]
     public class TaskThreadManager : ThreadManager
     {
-        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public TaskThreadManager(int maxConcurrentTasks)
             :this(maxConcurrentTasks, null)
@@ -56,9 +56,9 @@ namespace Abot.Util
             foreach (var exception in aggException.InnerExceptions)
             {
                 if(_cancellationTokenSource.IsCancellationRequested)
-                    _logger.Warn(exception);	//If the task was cancelled then this exception is expected happen and we don't care
+                    Logger.Warn(exception);	//If the task was cancelled then this exception is expected happen and we don't care
                 else
-                    _logger.Error(exception);	//If the task was not cancelled then this is an error
+                    Logger.Error(exception);	//If the task was not cancelled then this is an error
             }
         }
     }

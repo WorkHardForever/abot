@@ -13,12 +13,12 @@ namespace Abot.Util
 	{
 		#region Protected Fields
 
-		protected ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
-		protected bool _abortAllCalled = false;
-		protected int _numberOfRunningThreads = 0;
-		protected ManualResetEvent _resetEvent = new ManualResetEvent(true);
-		protected Object _locker = new Object();
-		protected bool _isDisplosed = false;
+		protected ILog Logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
+		protected bool AbortAllCalled = false;
+		protected int NumberOfRunningThreads = 0;
+		protected ManualResetEvent ResetEvent = new ManualResetEvent(true);
+		protected Object Locker = new Object();
+		protected bool IsDisplosed = false;
 
 		#endregion
 
@@ -52,21 +52,21 @@ namespace Abot.Util
 		public virtual void DoWork(Action action)
 		{
 			if (action == null)
-				throw new ArgumentNullException("action");
+				throw new ArgumentNullException(nameof(action));
 
-			if (_abortAllCalled)
+			if (AbortAllCalled)
 				throw new InvalidOperationException("Cannot call DoWork() after AbortAll() or Dispose() have been called.");
 
-			if (!_isDisplosed && MaxThreads > 1)
+			if (!IsDisplosed && MaxThreads > 1)
 			{
-				_resetEvent.WaitOne();
-				lock (_locker)
+				ResetEvent.WaitOne();
+				lock (Locker)
 				{
-					_numberOfRunningThreads++;
-					if (!_isDisplosed && _numberOfRunningThreads >= MaxThreads)
-						_resetEvent.Reset();
+					NumberOfRunningThreads++;
+					if (!IsDisplosed && NumberOfRunningThreads >= MaxThreads)
+						ResetEvent.Reset();
 
-					_logger.DebugFormat("Starting another thread, increasing running threads to [{0}].", _numberOfRunningThreads);
+					Logger.DebugFormat("Starting another thread, increasing running threads to [{0}].", NumberOfRunningThreads);
 				}
 				RunActionOnDedicatedThread(action);
 			}
@@ -81,7 +81,7 @@ namespace Abot.Util
 		/// </summary>
 		public virtual bool HasRunningThreads()
 		{
-			return _numberOfRunningThreads > 0;
+			return NumberOfRunningThreads > 0;
 		}
 
 		/// <summary>
@@ -89,15 +89,15 @@ namespace Abot.Util
 		/// </summary>
 		public virtual void AbortAll()
 		{
-			_abortAllCalled = true;
-			_numberOfRunningThreads = 0;
+			AbortAllCalled = true;
+			NumberOfRunningThreads = 0;
 		}
 
 		public virtual void Dispose()
 		{
 			AbortAll();
-			_resetEvent.Dispose();
-			_isDisplosed = true;
+			ResetEvent.Dispose();
+			IsDisplosed = true;
 		}
 
 		#endregion
@@ -109,28 +109,28 @@ namespace Abot.Util
 			try
 			{
 				action.Invoke();
-				_logger.Debug("Action completed successfully.");
+				Logger.Debug("Action completed successfully.");
 			}
 			catch (OperationCanceledException)
 			{
-				_logger.DebugFormat("Thread cancelled.");
+				Logger.DebugFormat("Thread cancelled.");
 				throw;
 			}
 			catch (Exception e)
 			{
-				_logger.Error("Error occurred while running action.");
-				_logger.Error(e);
+				Logger.Error("Error occurred while running action.");
+				Logger.Error(e);
 			}
 			finally
 			{
 				if (decrementRunningThreadCountOnCompletion)
 				{
-					lock (_locker)
+					lock (Locker)
 					{
-						_numberOfRunningThreads--;
-						_logger.DebugFormat("[{0}] threads are running.", _numberOfRunningThreads);
-						if (!_isDisplosed && _numberOfRunningThreads < MaxThreads)
-							_resetEvent.Set();
+						NumberOfRunningThreads--;
+						Logger.DebugFormat("[{0}] threads are running.", NumberOfRunningThreads);
+						if (!IsDisplosed && NumberOfRunningThreads < MaxThreads)
+							ResetEvent.Set();
 					}
 				}
 			}

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Abot.Poco;
 
-namespace Abot.Core
+namespace Abot.Core.Repositories
 {
 	/// <summary>
 	/// Handles managing the priority of what pages need to be crawled

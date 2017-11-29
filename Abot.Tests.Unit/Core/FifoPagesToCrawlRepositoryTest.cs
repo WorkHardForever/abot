@@ -1,4 +1,5 @@
 ﻿using Abot.Core;
+using Abot.Core.Repositories;
 using Commoner.Core.Testing;
 using NUnit.Framework;
 

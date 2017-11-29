@@ -3,6 +3,7 @@ using Abot.Poco;
 using Moq;
 using NUnit.Framework;
 using System;
+using Abot.Core.Robots;
 
 namespace Abot.Tests.Unit.Core
 {
@@ -11,7 +12,7 @@ namespace Abot.Tests.Unit.Core
     {
         private RobotsDotText _unitUnderTest;
         private Uri _rootUri = new Uri("http://www.spidertestsite1.com/");
-        
+
         private string _userAgentString = "Some User Agent...";
         private string _robotsContent = @"
 User-Agent: *
