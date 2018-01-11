@@ -70,7 +70,7 @@ namespace Abot.Core.Robots
 				return null;
 			}
 
-			CrawledPage page = PageRequester.MakeRequest(robotsUri);
+			CrawledPage page = PageRequester.MakeRequestAsync(robotsUri).Result;
 
 			if (page == null ||
 				page.WebException != null ||

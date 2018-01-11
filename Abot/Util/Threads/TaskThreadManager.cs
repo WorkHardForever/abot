@@ -49,7 +49,7 @@ namespace Abot.Util
         /// </summary>
         private void HandleAggregateExceptions(Task task)
         {
-            if (task == null || task.Exception == null) 
+            if (task?.Exception == null) 
                 return;
 
             var aggException = task.Exception.Flatten();

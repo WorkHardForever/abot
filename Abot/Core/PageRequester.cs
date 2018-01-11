@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using Abot.Poco;
 using log4net;
 
@@ -77,12 +78,13 @@ namespace Abot.Core
 		/// <summary>
 		/// Make an http web request to the url and download its content
 		/// </summary>
-		public virtual CrawledPage MakeRequest(Uri uri) => MakeRequest(uri, (x) => new CrawlDecision { Allow = true });
+		public virtual Task<CrawledPage> MakeRequestAsync(Uri uri) =>
+            MakeRequestAsync(uri, x => new CrawlDecision { Allow = true });
 
 		/// <summary>
 		/// Make an http web request to the url and download its content based on the param func decision
 		/// </summary>
-		public virtual CrawledPage MakeRequest(Uri uri, Func<CrawledPage, CrawlDecision> shouldDownloadContent)
+		public virtual async Task<CrawledPage> MakeRequestAsync(Uri uri, Func<CrawledPage, CrawlDecision> shouldDownloadContent)
 		{
 			if (uri == null)
 				throw new ArgumentNullException(nameof(uri));
@@ -99,7 +101,7 @@ namespace Abot.Core
 				request = BuildRequestObject(uri);
 
 				crawledPage.RequestStarted = DateTime.Now;
-				response = (HttpWebResponse)request.GetResponse();
+				response = await request.GetResponseAsync() as HttpWebResponse;
 
 				ProcessResponseObject(response);
 			}

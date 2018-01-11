@@ -196,6 +196,7 @@
     <Compile Include="Util\RateLimiter.cs" />
     <Compile Include="Core\Robots\RobotsDotText.cs" />
     <Compile Include="Core\Robots\RobotsDotTextFinder.cs" />
+    <Compile Include="Util\Threads\QueueTask.cs" />
     <Compile Include="Util\Threads\TaskThreadManager.cs" />
     <Compile Include="Util\Threads\ThreadManager.cs" />
     <Compile Include="Crawler\Args\CrawlArgs.cs" />

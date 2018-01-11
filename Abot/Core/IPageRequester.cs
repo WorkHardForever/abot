@@ -1,5 +1,6 @@
 ﻿using Abot.Poco;
 using System;
+using System.Threading.Tasks;
 
 namespace Abot.Core
 {
@@ -11,12 +12,12 @@ namespace Abot.Core
         /// <summary>
         /// Make an http web request to the url and download its content
         /// </summary>
-        CrawledPage MakeRequest(Uri uri);
+        Task<CrawledPage> MakeRequestAsync(Uri uri);
 
         /// <summary>
         /// Make an http web request to the url and download its content based on the param func decision
         /// </summary>
-        CrawledPage MakeRequest(Uri uri, Func<CrawledPage, CrawlDecision> shouldDownloadContent);
+        Task<CrawledPage> MakeRequestAsync(Uri uri, Func<CrawledPage, CrawlDecision> shouldDownloadContent);
 
         ///// <summary>
         ///// Asynchronously make an http web request to the url and download its content based on the param func decision

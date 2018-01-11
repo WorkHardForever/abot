@@ -84,9 +84,9 @@
 
 //            List<Uri> links = new List<Uri>{uri1, uri2};
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(_rootUri, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(homePage);
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(uri1, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page1);
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(uri2, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page2);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(_rootUri, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(homePage);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(uri1, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page1);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(uri2, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page2);
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.Is<CrawledPage>(p => p.Uri == homePage.Uri))).Returns(links);
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision{Allow = true});
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -95,9 +95,9 @@
 
 //            _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(_rootUri, It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(uri1, It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(uri2, It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(_rootUri, It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(uri1, It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(uri2, It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.Is<CrawledPage>(p => p.Uri == homePage.Uri)), Times.Exactly(1));
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.Is<CrawledPage>(p => p.Uri == uri1)), Times.Exactly(1));
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.Is<CrawledPage>(p => p.Uri == uri2)), Times.Exactly(1));
@@ -154,12 +154,12 @@
 //            _unitUnderTest = new PoliteWebCrawler(_dummyConfiguration, _fakeCrawlDecisionMaker.Object, _dummyThreadManager, _dummyScheduler, _fakeHttpRequester.Object, _fakeHyperLinkParser.Object, _fakeMemoryManager.Object, _fakeDomainRateLimiter.Object, _fakeRobotsDotTextFinder.Object);
 //            Exception ex = new Exception("oh no");
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Throws(ex);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Throws(ex);
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Exactly(1));
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Exactly(1));
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Exactly(1));
 //            Assert.IsTrue(result.ErrorOccurred);
 //            Assert.AreSame(ex, result.ErrorException);
 //            Assert.AreEqual(0, _dummyScheduler.Count);
@@ -173,12 +173,12 @@
 //        {
 //            Exception ex = new Exception("oh no");
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Throws(ex);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Throws(ex);
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Exactly(1));
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Exactly(1));
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Exactly(1));
 //            Assert.IsTrue(result.ErrorOccurred);
 //            Assert.AreSame(ex, result.ErrorException);
 //            Assert.AreEqual(0, _dummyScheduler.Count);
@@ -191,7 +191,7 @@
 //        [Test]
 //        public void Crawl_CrawlDecisionMakerMethodsReturnTrue_PageCrawlStartingAndCompletedEventsFires()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -207,7 +207,7 @@
 
 //            _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -221,7 +221,7 @@
 //        [Test]
 //        public void Crawl_CrawlDecisionMakerShouldCrawlLinksMethodReturnsFalse_PageLinksCrawlDisallowedEventFires()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
@@ -237,7 +237,7 @@
 
 //            _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -264,7 +264,7 @@
 
 //            _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>()), Times.Never());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>()), Times.Never());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Never());
@@ -279,7 +279,7 @@
 //        [Test]
 //        public void Crawl_PageCrawlStartingAndCompletedEventSubscriberThrowsExceptions_DoesNotCrash()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -298,7 +298,7 @@
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -341,7 +341,7 @@
 //        [Test]
 //        public void Crawl_PageLinksCrawlDisallowedSubscriberThrowsExceptions_DoesNotCrash()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
@@ -359,7 +359,7 @@
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -378,7 +378,7 @@
 //        {
 //            int elapsedTimeForLongJob = 1000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaaa" });
@@ -400,7 +400,7 @@
 
 //            int elapsedTimeForLongJob = 1000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.Is<CrawledPage>(p => p.Uri == _rootUri))).Returns(new List<Uri>(){
 //                new Uri(_rootUri.AbsoluteUri + "page2.html"), //should be fired sync
 //                new Uri(_rootUri.AbsoluteUri + "page3.html"), //should be fired sync
@@ -424,7 +424,7 @@
 //        {
 //            int elapsedTimeForLongJob = 1000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
 
@@ -442,7 +442,7 @@
 //        {
 //            int elapsedTimeForLongJob = 1000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
@@ -464,7 +464,7 @@
 //        public void Crawl_ShouldFire_RobotsTxtParseCompletedAsync()
 //        {
 //            _dummyConfiguration.IsRespectRobotsDotTextEnabled = true;
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeRobotsDotTextFinder.Setup(f => f.Find(It.IsAny<Uri>())).Returns(new RobotsDotText(_rootUri, string.Empty));
 
@@ -480,7 +480,7 @@
 //        [Test]
 //        public void Crawl_CrawlDecisionMakerMethodsReturnTrue_PageCrawlStartingAndCompletedAsyncEventsFires()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -497,7 +497,7 @@
 //            _unitUnderTest.Crawl(_rootUri);
 //            System.Threading.Thread.Sleep(100);//sleep since the events are async and may not complete before returning
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -511,7 +511,7 @@
 //        [Test]
 //        public void Crawl_CrawlDecisionMakerShouldCrawlLinksMethodReturnsFalse_PageLinksCrawlDisallowedAsyncEventFires()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
@@ -528,7 +528,7 @@
 //            _unitUnderTest.Crawl(_rootUri);
 //            System.Threading.Thread.Sleep(100);//sleep since the events are async and may not complete before returning
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -556,7 +556,7 @@
 //            _unitUnderTest.Crawl(_rootUri);
 //            System.Threading.Thread.Sleep(100);//sleep since the events are async and may not complete before returning
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>()), Times.Never());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>()), Times.Never());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Never());
@@ -571,7 +571,7 @@
 //        [Test]
 //        public void Crawl_PageCrawlStartingAndCompletedAsyncEventSubscriberThrowsExceptions_DoesNotCrash()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -591,7 +591,7 @@
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 //            System.Threading.Thread.Sleep(1000);//sleep since the events are async and may not complete
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -635,7 +635,7 @@
 //        [Test]
 //        public void Crawl_PageLinksCrawlDisallowedAsyncSubscriberThrowsExceptions_DoesNotCrash()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
@@ -654,7 +654,7 @@
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 //            System.Threading.Thread.Sleep(2000);//sleep since the events are async and may not complete, set to 2 seconds since this test was mysteriously failing only when run with code coverage
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -673,7 +673,7 @@
 //        {
 //            int elapsedTimeForLongJob = 5000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaaa" });
@@ -695,7 +695,7 @@
 
 //            int elapsedTimeForLongJob = 2000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.Is<CrawledPage>(p => p.Uri == _rootUri))).Returns(new List<Uri>(){
 //                new Uri(_rootUri.AbsoluteUri + "page2.html"), //should be fired async
 //                new Uri(_rootUri.AbsoluteUri + "page3.html"), //should be fired async
@@ -721,7 +721,7 @@
 //        {
 //            int elapsedTimeForLongJob = 5000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
 
@@ -739,7 +739,7 @@
 //        {
 //            int elapsedTimeForLongJob = 5000;
 
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false, Reason = "aaa" });
@@ -759,7 +759,7 @@
 //        public void Crawl_CrawlDecisionDelegatesReturnTrue_EventsFired()
 //        {
 //            //Arrange
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri> { new Uri("http://a.com/a"), new Uri("http://a.com/b") });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -804,7 +804,7 @@
 //            //Assert
 //            System.Threading.Thread.Sleep(150);//sleep since the events are async and may not complete before returning
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Exactly(3));//1 for _rootUri, 2 for the returned links
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -853,7 +853,7 @@
 //        public void Crawl_ShouldFire_RobotsTxtParseCompleted()
 //        {
 //            _dummyConfiguration.IsRespectRobotsDotTextEnabled = true;
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeRobotsDotTextFinder.Setup(f => f.Find(It.IsAny<Uri>())).Returns(new RobotsDotText(_rootUri, string.Empty));
 
@@ -869,7 +869,7 @@
 //        [Test]
 //        public void Crawl_ShouldCrawlLinksDelegateReturnsFalse_PageLinksNotCrawled()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -890,7 +890,7 @@
 
 //            _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Never());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -904,14 +904,14 @@
 //        [Test]
 //        public void Crawl_CrawlResult_CrawlContextIsSet()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -930,7 +930,7 @@
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldRecrawlPage(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false });
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _unitUnderTest.PageCrawlStarting += (e, a) =>
 //            {
 //                a.CrawlContext.IsCrawlStopRequested = true;
@@ -959,7 +959,7 @@
 
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _unitUnderTest.PageCrawlStarting += (e, a) =>
 //            {
 //                a.CrawlContext.IsCrawlHardStopRequested = true;
@@ -1053,7 +1053,7 @@
 //                .Callback(() => System.Threading.Thread.Sleep(2000))
 //                .Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = false });
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(crawledPage);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(crawledPage);
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 
@@ -1066,7 +1066,7 @@
 //        [Test]
 //        public void CrawlBag_IsSetOnCrawlContext()
 //        {
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(new CrawledPage(_rootUri));
 //            _fakeHyperLinkParser.Setup(f => f.GetLinks(It.IsAny<CrawledPage>())).Returns(new List<Uri>());
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -1077,7 +1077,7 @@
 
 //            _unitUnderTest.Crawl(_rootUri);
 
-//            _fakeHttpRequester.Verify(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
+//            _fakeHttpRequester.Verify(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>()), Times.Once());
 //            _fakeHyperLinkParser.Verify(f => f.GetLinks(It.IsAny<CrawledPage>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>()), Times.Once());
 //            _fakeCrawlDecisionMaker.Verify(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>()), Times.Once());
@@ -1138,9 +1138,9 @@
 //            // All links are found in each pages.
 //            _fakeHyperLinkParser.Setup(parser => parser.GetLinks(It.IsAny<CrawledPage>())).Returns(new [] { fakeLink1, fakeLink2, fakeLink3 });
             
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(_rootUri, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(homePage);
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(fakeLink1, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page1);
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(fakeLink2, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page2);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(_rootUri, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(homePage);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(fakeLink1, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page1);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(fakeLink2, It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page2);
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.IsAny<PageToCrawl>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision{Allow = true});
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPage(It.Is<PageToCrawl>(p => p.Uri == fakeLink3), It.IsAny<CrawlContext>())).Returns(new CrawlDecision{Allow = false});
 //            _fakeCrawlDecisionMaker.Setup(f => f.ShouldCrawlPageLinks(It.IsAny<CrawledPage>(), It.IsAny<CrawlContext>())).Returns(new CrawlDecision { Allow = true });
@@ -1172,7 +1172,7 @@
 //                    null,
 //                    new WebHeaderCollection{ {"Retry-After", "1"} })
 //            };
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
 
 //            Stopwatch watch = new Stopwatch();
 //            watch.Start();
@@ -1202,7 +1202,7 @@
 //                    null,
 //                    new WebHeaderCollection{ {"Retry-After", DateTime.Now.AddSeconds(1).ToString() } })
 //            };
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
 
 //            Stopwatch watch = new Stopwatch();
 //            watch.Start();
@@ -1229,7 +1229,7 @@
 //                    Headers = new WebHeaderCollection { { "Location", redirectedUri.AbsoluteUri } }
 //                }
 //            };
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 //            Assert.That(result.CrawlContext.RootUri.AbsoluteUri, Is.EqualTo(redirectedUri));
@@ -1251,7 +1251,7 @@
 //                    ResponseUri = redirectedUri
 //                }
 //            };
-//            _fakeHttpRequester.Setup(f => f.MakeRequest(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
+//            _fakeHttpRequester.Setup(f => f.MakeRequestAsync(It.IsAny<Uri>(), It.IsAny<Func<CrawledPage, CrawlDecision>>())).Returns(page);
 
 //            CrawlResult result = _unitUnderTest.Crawl(_rootUri);
 //            Assert.That(result.CrawlContext.RootUri.AbsoluteUri, Is.EqualTo(redirectedUri));

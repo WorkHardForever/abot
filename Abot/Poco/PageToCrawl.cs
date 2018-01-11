@@ -78,10 +78,23 @@ namespace Abot.Poco
 		/// </summary>
 		public DateTime? LastRequestTime { get; set; }
 
+		private bool _isRoot;
 		/// <summary>
 		/// Whether the page is the root uri of the crawl
 		/// </summary>
-		public bool IsRoot { get; set; }
+		public bool IsRoot
+		{
+			get => _isRoot;
+			set
+			{
+				if (value)
+				{
+					IsInternal = true;
+					ParentUri = Uri;
+				}
+				_isRoot = value;
+			}
+		}
 
 		/// <summary>
 		/// Whether the page is internal to the root uri of the crawl

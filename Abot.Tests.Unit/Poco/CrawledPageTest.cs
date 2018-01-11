@@ -221,7 +221,7 @@ namespace Abot.Tests.Unit.Poco
         [Test, Ignore("Failing on the build server for some reason")]//TODO FIx this test
         public void ToString_HttpResponseExists_MessageHasUriAndStatus()
         {
-            Assert.AreEqual("http://localhost.fiddler:1111/[200]", new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/")).ToString());
+            Assert.AreEqual("http://localhost.fiddler:1111/[200]", new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/")).ToString());
         }
 
         [Test]

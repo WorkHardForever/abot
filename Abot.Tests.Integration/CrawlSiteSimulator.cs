@@ -22,14 +22,14 @@
 //        [Test]
 //        public void Crawl_VerifyCrawlResultIsAsExpected()
 //        {
-//            new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
+//            new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
 //            base.CrawlAndAssert(new PoliteWebCrawler());
 //        }
 
 //        [Test]
 //        public void Crawl_MaxPagesTo5_OnlyCrawls5Pages()
 //        {
-//            new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
+//            new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
             
 //            CrawlConfiguration configuration = new CrawlConfiguration();
 //            configuration.MaxPagesToCrawl = 5;
@@ -47,7 +47,7 @@
 //        [Test]
 //        public void Crawl_MaxPagesTo25_OnlyCrawls25Pages()
 //        {
-//            new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
+//            new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
 
 //            CrawlConfiguration configuration = new CrawlConfiguration();
 //            configuration.MaxPagesToCrawl = 25;
@@ -65,7 +65,7 @@
 //        [Test]
 //        public void Crawl_MaxPagesTo5_WithCrawlDelay_OnlyCrawls5Pages()
 //        {
-//            new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
+//            new PageRequester(new CrawlConfiguration{ UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
 
 //            CrawlConfiguration configuration = new CrawlConfiguration();
 //            configuration.MinCrawlDelayPerDomainMilliSeconds = 1000; //adding delay since it increases the chance of issues with abot crawling more than MaxPagesToCrawl.
@@ -143,7 +143,7 @@
 //        [Test]
 //        public void Crawl_IsRateLimited()
 //        {
-//            new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
+//            new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
 
 //            CrawlConfiguration configuration = new CrawlConfiguration();
 //            configuration.MaxPagesToCrawl = 3;
@@ -166,7 +166,7 @@
 //        [Test]
 //        public void Crawl_RetryEnabled_VerifyCrawlResultIsAsExpected()
 //        {
-//            new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" }).MakeRequest(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
+//            new PageRequester(new CrawlConfiguration { UserAgentString = "aaa" }).MakeRequestAsync(new Uri("http://localhost.fiddler:1111/PageGenerator/ClearCounters"));
 
 //            CrawlConfiguration configuration = AbotConfigurationSectionHandler.LoadFromXml().Convert();
 //            configuration.MaxRetryCount = 3;
