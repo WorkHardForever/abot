@@ -91,7 +91,7 @@ namespace Abot.Core
 		{
 			string charset = null;
 
-			String ctype = webResponse.Headers["content-type"];
+			string ctype = webResponse.Headers["content-type"];
 			if (ctype != null)
 			{
 				int ind = ctype.IndexOf("charset=");
@@ -103,13 +103,13 @@ namespace Abot.Core
 		}
 
 		/// <summary>
-		/// Try get charset using regex match
+		/// Try get charset using regex match otherwise null
 		/// </summary>
 		/// <param name="body">Content</param>
 		/// <returns>Encoding</returns>
 		protected virtual string GetCharsetFromBody(string body)
 		{
-			String charset = null;
+			string charset = null;
 
 			if (body != null)
 			{
@@ -140,10 +140,9 @@ namespace Abot.Core
 				{
 					encoding = Encoding.GetEncoding(charset);
 				}
-				catch (Exception e)
+				catch (Exception ex)
 				{
-					Logger.Error(e);
-					throw e;
+					Logger.ErrorFormat("{0} {1}", "Charset isn't correct. Choosed UTF-8 by default", ex);
 				}
 			}
 

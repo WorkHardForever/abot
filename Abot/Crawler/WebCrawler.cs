@@ -11,9 +11,12 @@ using Abot.Core;
 using Abot.Core.Config;
 using Abot.Core.Parsers;
 using Abot.Core.Repositories;
+using Abot.Crawler.EventArgs;
+using Abot.Crawler.Interfaces;
 using Abot.Poco;
 using Abot.Util;
 using Abot.Util.Threads;
+using Abot.Util.Time;
 using CefSharp.Internals;
 using log4net;
 using Timer = System.Timers.Timer;
@@ -27,16 +30,6 @@ namespace Abot.Crawler
 	[Serializable]
 	public abstract class WebCrawler : IWebCrawler
 	{
-		// TODO converter
-		#region Const
-
-		/// <summary>
-		/// Value for translation seconds to milliseconds
-		/// </summary>
-		public const int MillisecondTranslation = 1000;
-
-		#endregion
-
 		#region Protected Fields
 
 		/// <summary>
@@ -156,13 +149,6 @@ namespace Abot.Crawler
 							new Scheduler(config.IsUriRecrawlingEnabled, null, null),
 			};
 
-			// TODO task factory
-			//ThreadManager = threadManager ?? new TaskThreadManager(
-			//    IsPayAttention(CrawlContext.CrawlConfiguration.MaxConcurrentThreads) ?
-			//        CrawlContext.CrawlConfiguration.MaxConcurrentThreads :
-			//        Environment.ProcessorCount
-			//);
-
 			// Set default if custom is null
 			CrawlDecisionMaker = crawlDecisionMaker ?? new CrawlDecisionMaker();
 			PageRequester = pageRequester ?? new PageRequester(CrawlContext.CrawlConfiguration);
@@ -214,28 +200,28 @@ namespace Abot.Crawler
 		/// <summary>
 		/// Synchronous event that is fired before a page is crawled.
 		/// </summary>
-		public event EventHandler<PageCrawlStartingArgs> PageCrawlStarting;
+		public event EventHandler<PageCrawlEventStartingEventArgs> PageCrawlStarting;
 
 		/// <summary>
 		/// Synchronous event that is fired when an individual page has been crawled.
 		/// </summary>
-		public event EventHandler<PageCrawlCompletedArgs> PageCrawlCompleted;
+		public event EventHandler<PageCrawlEventCompletedEventArgs> PageCrawlCompleted;
 
 		/// <summary>
 		/// Synchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawl impl returned false. This means the page or its links were not crawled.
 		/// </summary>
-		public event EventHandler<PageCrawlDisallowedArgs> PageCrawlDisallowed;
+		public event EventHandler<PageCrawlEventDisallowedEventArgs> PageCrawlDisallowed;
 
 		/// <summary>
 		/// Synchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawlLinks impl returned false. This means the page's links were not crawled.
 		/// </summary>
-		public event EventHandler<PageLinksCrawlDisallowedArgs> PageLinksCrawlDisallowed;
+		public event EventHandler<PageLinksCrawlEventDisallowedEventArgs> PageLinksCrawlDisallowed;
 
 		protected virtual void FirePageCrawlStartingEvent(PageToCrawl pageToCrawl)
 		{
 			try
 			{
-				PageCrawlStarting?.Invoke(this, new PageCrawlStartingArgs(CrawlContext, pageToCrawl));
+				PageCrawlStarting?.Invoke(this, new PageCrawlEventStartingEventArgs(CrawlContext, pageToCrawl));
 			}
 			catch (Exception e)
 			{
@@ -248,7 +234,7 @@ namespace Abot.Crawler
 		{
 			try
 			{
-				PageCrawlCompleted?.Invoke(this, new PageCrawlCompletedArgs(CrawlContext, crawledPage));
+				PageCrawlCompleted?.Invoke(this, new PageCrawlEventCompletedEventArgs(CrawlContext, crawledPage));
 			}
 			catch (Exception e)
 			{
@@ -261,7 +247,7 @@ namespace Abot.Crawler
 		{
 			try
 			{
-				PageCrawlDisallowed?.Invoke(this, new PageCrawlDisallowedArgs(CrawlContext, pageToCrawl, reason));
+				PageCrawlDisallowed?.Invoke(this, new PageCrawlEventDisallowedEventArgs(CrawlContext, pageToCrawl, reason));
 			}
 			catch (Exception e)
 			{
@@ -274,7 +260,7 @@ namespace Abot.Crawler
 		{
 			try
 			{
-				PageLinksCrawlDisallowed?.Invoke(this, new PageLinksCrawlDisallowedArgs(CrawlContext, crawledPage, reason));
+				PageLinksCrawlDisallowed?.Invoke(this, new PageLinksCrawlEventDisallowedEventArgs(CrawlContext, crawledPage, reason));
 			}
 			catch (Exception e)
 			{
@@ -290,39 +276,39 @@ namespace Abot.Crawler
 		/// <summary>
 		/// Asynchronous event that is fired before a page is crawled.
 		/// </summary>
-		public event EventHandler<PageCrawlStartingArgs> PageCrawlStartingAsync;
+		public event EventHandler<PageCrawlEventStartingEventArgs> PageCrawlStartingAsync;
 
 		/// <summary>
 		/// Asynchronous event that is fired when an individual page has been crawled.
 		/// </summary>
-		public event EventHandler<PageCrawlCompletedArgs> PageCrawlCompletedAsync;
+		public event EventHandler<PageCrawlEventCompletedEventArgs> PageCrawlCompletedAsync;
 
 		/// <summary>
 		/// Asynchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawl impl returned false. This means the page or its links were not crawled.
 		/// </summary>
-		public event EventHandler<PageCrawlDisallowedArgs> PageCrawlDisallowedAsync;
+		public event EventHandler<PageCrawlEventDisallowedEventArgs> PageCrawlDisallowedAsync;
 
 		/// <summary>
 		/// Asynchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawlLinks impl returned false. This means the page's links were not crawled.
 		/// </summary>
-		public event EventHandler<PageLinksCrawlDisallowedArgs> PageLinksCrawlDisallowedAsync;
+		public event EventHandler<PageLinksCrawlEventDisallowedEventArgs> PageLinksCrawlDisallowedAsync;
 
 		protected virtual void FirePageCrawlStartingEventAsync(PageToCrawl pageToCrawl)
 		{
-			EventHandler<PageCrawlStartingArgs> threadSafeEvent = PageCrawlStartingAsync;
+			EventHandler<PageCrawlEventStartingEventArgs> threadSafeEvent = PageCrawlStartingAsync;
 			if (threadSafeEvent != null)
 			{
 				//Fire each subscribers delegate async
-				foreach (EventHandler<PageCrawlStartingArgs> del in threadSafeEvent.GetInvocationList())
+				foreach (EventHandler<PageCrawlEventStartingEventArgs> del in threadSafeEvent.GetInvocationList())
 				{
-					del.BeginInvoke(this, new PageCrawlStartingArgs(CrawlContext, pageToCrawl), null, null);
+					del.BeginInvoke(this, new PageCrawlEventStartingEventArgs(CrawlContext, pageToCrawl), null, null);
 				}
 			}
 		}
 
 		protected virtual void FirePageCrawlCompletedEventAsync(CrawledPage crawledPage)
 		{
-			EventHandler<PageCrawlCompletedArgs> threadSafeEvent = PageCrawlCompletedAsync;
+			EventHandler<PageCrawlEventCompletedEventArgs> threadSafeEvent = PageCrawlCompletedAsync;
 
 			if (threadSafeEvent == null)
 				return;
@@ -332,7 +318,7 @@ namespace Abot.Crawler
 				//Must be fired synchronously to avoid main thread exiting before completion of event handler for first or last page crawled
 				try
 				{
-					threadSafeEvent(this, new PageCrawlCompletedArgs(CrawlContext, crawledPage));
+					threadSafeEvent(this, new PageCrawlEventCompletedEventArgs(CrawlContext, crawledPage));
 				}
 				catch (Exception e)
 				{
@@ -343,35 +329,35 @@ namespace Abot.Crawler
 			else
 			{
 				//Fire each subscribers delegate async
-				foreach (EventHandler<PageCrawlCompletedArgs> del in threadSafeEvent.GetInvocationList())
+				foreach (EventHandler<PageCrawlEventCompletedEventArgs> del in threadSafeEvent.GetInvocationList())
 				{
-					del.BeginInvoke(this, new PageCrawlCompletedArgs(CrawlContext, crawledPage), null, null);
+					del.BeginInvoke(this, new PageCrawlEventCompletedEventArgs(CrawlContext, crawledPage), null, null);
 				}
 			}
 		}
 
 		protected virtual void FirePageCrawlDisallowedEventAsync(PageToCrawl pageToCrawl, string reason)
 		{
-			EventHandler<PageCrawlDisallowedArgs> threadSafeEvent = PageCrawlDisallowedAsync;
+			EventHandler<PageCrawlEventDisallowedEventArgs> threadSafeEvent = PageCrawlDisallowedAsync;
 			if (threadSafeEvent != null)
 			{
 				//Fire each subscribers delegate async
-				foreach (EventHandler<PageCrawlDisallowedArgs> del in threadSafeEvent.GetInvocationList())
+				foreach (EventHandler<PageCrawlEventDisallowedEventArgs> del in threadSafeEvent.GetInvocationList())
 				{
-					del.BeginInvoke(this, new PageCrawlDisallowedArgs(CrawlContext, pageToCrawl, reason), null, null);
+					del.BeginInvoke(this, new PageCrawlEventDisallowedEventArgs(CrawlContext, pageToCrawl, reason), null, null);
 				}
 			}
 		}
 
 		protected virtual void FirePageLinksCrawlDisallowedEventAsync(CrawledPage crawledPage, string reason)
 		{
-			EventHandler<PageLinksCrawlDisallowedArgs> threadSafeEvent = PageLinksCrawlDisallowedAsync;
+			EventHandler<PageLinksCrawlEventDisallowedEventArgs> threadSafeEvent = PageLinksCrawlDisallowedAsync;
 			if (threadSafeEvent != null)
 			{
 				//Fire each subscribers delegate async
-				foreach (EventHandler<PageLinksCrawlDisallowedArgs> del in threadSafeEvent.GetInvocationList())
+				foreach (EventHandler<PageLinksCrawlEventDisallowedEventArgs> del in threadSafeEvent.GetInvocationList())
 				{
-					del.BeginInvoke(this, new PageLinksCrawlDisallowedArgs(CrawlContext, crawledPage, reason), null, null);
+					del.BeginInvoke(this, new PageLinksCrawlEventDisallowedEventArgs(CrawlContext, crawledPage, reason), null, null);
 				}
 			}
 		}
@@ -463,7 +449,7 @@ namespace Abot.Crawler
 		{
 			if (IsPayAttention(CrawlContext.CrawlConfiguration.CrawlTimeoutSeconds))
 			{
-				TimeoutTimer = new Timer(CrawlContext.CrawlConfiguration.CrawlTimeoutSeconds * MillisecondTranslation);
+				TimeoutTimer = new Timer(TimeConverter.SecondsToMilliseconds(CrawlContext.CrawlConfiguration.CrawlTimeoutSeconds));
 				TimeoutTimer.Elapsed += HandleCrawlTimeout;
 				TimeoutTimer.Start();
 			}
@@ -492,7 +478,7 @@ namespace Abot.Crawler
 			VerifyRequiredAvailableMemory();
 
 			// Starting crawl root page
-			CrawlSite(crawlResult);
+			ParallelCrawlSite(crawlResult);
 		}
 
 		/// <summary>
@@ -500,7 +486,7 @@ namespace Abot.Crawler
 		/// in several threads if it available
 		/// </summary>
 		/// <param name="crawlResult"></param>
-		protected virtual void CrawlSite(CrawlResult crawlResult)
+		protected virtual void ParallelCrawlSite(CrawlResult crawlResult)
 		{
 			QueueTask parallelTask = new QueueTask();
 
@@ -533,6 +519,7 @@ namespace Abot.Crawler
 					parallelTask.WaitTasksComplition();
 					continue;
 				}
+
 
 				parallelTask.Add(() => ProcessPage(CrawlContext.Scheduler.GetNext(), crawlResult));
 			}
@@ -920,8 +907,7 @@ namespace Abot.Crawler
 			if (!shouldCrawlPageDecision.Allow)
 			{
 				Logger.DebugFormat("Page [{0}] not crawled, Reason: [{1}]", pageToCrawl.Uri.AbsoluteUri, shouldCrawlPageDecision.Reason);
-
-				// TODO nice event calling
+				
 				FirePageCrawlDisallowedEventAsync(pageToCrawl, shouldCrawlPageDecision.Reason);
 				FirePageCrawlDisallowedEvent(pageToCrawl, shouldCrawlPageDecision.Reason);
 			}
@@ -970,8 +956,7 @@ namespace Abot.Crawler
 				// Look for the Retry-After header in the response.
 				crawledPage.RetryAfter = null;
 
-				if (crawledPage.HttpWebResponse != null &&
-					crawledPage.HttpWebResponse.Headers != null)
+				if (crawledPage.HttpWebResponse?.Headers != null)
 				{
 					string value = crawledPage.HttpWebResponse.GetResponseHeader("Retry-After");
 
@@ -981,9 +966,9 @@ namespace Abot.Crawler
 						if (crawledPage.LastRequestTime.HasValue &&
 							DateTime.TryParse(value, out DateTime date))
 						{
-							crawledPage.RetryAfter = (date - crawledPage.LastRequestTime.Value).TotalSeconds;
+							crawledPage.RetryAfter = (long)(date - crawledPage.LastRequestTime.Value).TotalSeconds;
 						}
-						else if (double.TryParse(value, out double seconds))
+						else if (long.TryParse(value, out long seconds))
 						{
 							crawledPage.RetryAfter = seconds;
 						}
@@ -1006,8 +991,7 @@ namespace Abot.Crawler
 		protected virtual async Task<CrawledPage> CrawlThePage(PageToCrawl pageToCrawl)
 		{
 			Logger.DebugFormat("About to crawl page [{0}]", pageToCrawl.Uri.AbsoluteUri);
-
-			// TODO nice events
+			
 			FirePageCrawlStartingEventAsync(pageToCrawl);
 			FirePageCrawlStartingEvent(pageToCrawl);
 
@@ -1239,7 +1223,6 @@ namespace Abot.Crawler
 		/// <param name="pageToCrawl"></param>
 		protected virtual void WaitMinimumRetryDelay(PageToCrawl pageToCrawl)
 		{
-			//TODO No unit tests cover these lines
 			if (pageToCrawl.LastRequestTime == null)
 			{
 				Logger.WarnFormat("pageToCrawl.LastRequest value is null for Url:{0}. Cannot retry without this value.",
@@ -1249,29 +1232,29 @@ namespace Abot.Crawler
 			}
 
 			double milliSinceLastRequest = (DateTime.Now - pageToCrawl.LastRequestTime.Value).TotalMilliseconds;
-			double milliToWait;
+			double timeToWait;
 			if (pageToCrawl.RetryAfter.HasValue)
 			{
 				// Use the time to wait provided by the server instead of the config, if any.
-				milliToWait = pageToCrawl.RetryAfter.Value * MillisecondTranslation - milliSinceLastRequest;
+				timeToWait = TimeConverter.SecondsToMilliseconds(pageToCrawl.RetryAfter.Value) - milliSinceLastRequest;
 			}
 			else
 			{
 				if (milliSinceLastRequest > CrawlContext.CrawlConfiguration.MinRetryDelayInMilliseconds)
 					return;
 
-				milliToWait = CrawlContext.CrawlConfiguration.MinRetryDelayInMilliseconds - milliSinceLastRequest;
+				timeToWait = CrawlContext.CrawlConfiguration.MinRetryDelayInMilliseconds - milliSinceLastRequest;
 			}
 
 			Logger.InfoFormat("Waiting [{0}] milliseconds before retrying Url:[{1}] LastRequest:[{2}] SoonestNextRequest:[{3}]",
-				milliToWait,
+				timeToWait,
 				pageToCrawl.Uri.AbsoluteUri,
 				pageToCrawl.LastRequestTime,
 				pageToCrawl.LastRequestTime.Value.AddMilliseconds(CrawlContext.CrawlConfiguration.MinRetryDelayInMilliseconds));
 
 			// TODO Cannot use RateLimiter since it currently cannot handle dynamic sleep times so using Thread.Sleep in the meantime
-			if (milliToWait > 0)
-				Thread.Sleep(TimeSpan.FromMilliseconds(milliToWait));
+			if (timeToWait > 0)
+				Thread.Sleep(TimeSpan.FromMilliseconds(timeToWait));
 		}
 
 		/// <summary>
@@ -1360,10 +1343,7 @@ namespace Abot.Crawler
 		private CrawlConfiguration GenerateDefaultCrawlConfiguration()
 		{
 			Logger.DebugFormat("Crawl configuration: Generate default");
-			return new CrawlConfiguration()
-			{
-				// TODO Some default values
-			};
+			return new CrawlConfiguration();
 		}
 
 		#endregion

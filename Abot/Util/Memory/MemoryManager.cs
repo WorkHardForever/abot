@@ -49,8 +49,7 @@ namespace Abot.Util
 			}
 			finally
 			{
-				if (memoryFailPoint != null)
-					memoryFailPoint.Dispose();
+				memoryFailPoint?.Dispose();
 			}
 
 			return isAvailable;

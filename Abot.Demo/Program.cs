@@ -1,6 +1,8 @@
 ﻿using Abot.Crawler;
 using Abot.Poco;
 using System;
+using Abot.Crawler.EventArgs;
+using Abot.Crawler.Interfaces;
 
 namespace Abot.Demo
 {
@@ -145,22 +147,22 @@ namespace Abot.Demo
             System.Console.ForegroundColor = originalColor;
         }
 
-        static void Crawler_ProcessPageCrawlStarting(object sender, PageCrawlStartingArgs e)
+        static void Crawler_ProcessPageCrawlStarting(object sender, PageCrawlEventStartingEventArgs e)
         {
             //Process data
         }
 
-        static void Crawler_ProcessPageCrawlCompleted(object sender, PageCrawlCompletedArgs e)
+        static void Crawler_ProcessPageCrawlCompleted(object sender, PageCrawlEventCompletedEventArgs e)
         {
             //Process data
         }
 
-        static void Crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlDisallowedArgs e)
+        static void Crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlEventDisallowedEventArgs e)
         {
             //Process data
         }
 
-        static void Crawler_PageCrawlDisallowed(object sender, PageCrawlDisallowedArgs e)
+        static void Crawler_PageCrawlDisallowed(object sender, PageCrawlEventDisallowedEventArgs e)
         {
             //Process data
         }

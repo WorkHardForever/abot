@@ -8,6 +8,7 @@ using Abot.Core;
 using Abot.Core.Repositories;
 using Abot.Core.Robots;
 using Abot.Core.Sitemap;
+using Abot.Crawler.Interfaces;
 using Abot.Poco;
 using Abot.Util;
 using CefSharp;
@@ -133,8 +134,8 @@ namespace Abot.Crawler
 
 				CrawlResult crawlResult = new CrawlResult();
 				CrawlComplete = false;
-				//await Task.Run(() => CrawlSite(crawlResult));
-				CrawlSite(crawlResult);
+				//await Task.Run(() => ParallelCrawlSite(crawlResult));
+				ParallelCrawlSite(crawlResult);
 				results.Add(crawlResult);
 			}
 

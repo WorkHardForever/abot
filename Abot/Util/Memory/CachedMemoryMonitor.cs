@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Timers;
 using Abot.Poco;
+using Abot.Util.Time;
 using log4net;
 
 namespace Abot.Util
 {
 	[Serializable]
-	public class CachedMemoryMonitor : IMemoryMonitor, IDisposable
+	public class CachedMemoryMonitor : IMemoryMonitor
 	{
 	    private static ILog _logger = LogManager.GetLogger(CrawlConfiguration.LoggerName);
 	    private IMemoryMonitor _memoryMonitor;
@@ -25,7 +26,7 @@ namespace Abot.Util
 
 			UpdateCurrentUsageValue();
 
-			_usageRefreshTimer = new Timer(cacheExpirationInSeconds * 1000);
+			_usageRefreshTimer = new Timer(TimeConverter.SecondsToMilliseconds(cacheExpirationInSeconds));
 			_usageRefreshTimer.Elapsed += (sender, e) => UpdateCurrentUsageValue();
 			_usageRefreshTimer.Start();
 		}

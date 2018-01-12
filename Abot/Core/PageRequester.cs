@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Abot.Poco;
+using Abot.Util.Time;
 using log4net;
 
 namespace Abot.Core
@@ -191,7 +192,7 @@ namespace Abot.Core
 				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
 			if (Config.HttpRequestTimeoutInSeconds > 0)
-				request.Timeout = Config.HttpRequestTimeoutInSeconds * 1000;
+				request.Timeout = (int)TimeConverter.SecondsToMilliseconds(Config.HttpRequestTimeoutInSeconds);
 
 			if (Config.IsSendingCookiesEnabled)
 				request.CookieContainer = CookieContainer;

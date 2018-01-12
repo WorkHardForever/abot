@@ -62,15 +62,7 @@ namespace Abot.Poco
 
 			if (!IsMutuallyAuthenticatedImplemented.HasValue)
 			{
-				try
-				{
-					IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;
-					IsMutuallyAuthenticatedImplemented = true;
-				}
-				catch (NotImplementedException)
-				{
-					IsMutuallyAuthenticatedImplemented = false;
-				}
+				IsMutuallyAuthenticatedImplemented = false;
 			}
 
 			IsMutuallyAuthenticated = IsMutuallyAuthenticatedImplemented.Value &&

@@ -6,8 +6,11 @@ using System.Threading;
 using Abot.Core;
 using Abot.Core.Repositories;
 using Abot.Core.Robots;
+using Abot.Crawler.EventArgs;
+using Abot.Crawler.Interfaces;
 using Abot.Poco;
 using Abot.Util;
+using Abot.Util.Time;
 using Robots;
 
 namespace Abot.Crawler
@@ -113,7 +116,7 @@ namespace Abot.Crawler
 		protected bool TryLoadRobotsTxt(Uri uri)
 		{
 			int robotsDotTextCrawlDelayInSecs = 0;
-			int robotsDotTextCrawlDelayInMillisecs = 0;
+			long robotsDotTextCrawlDelayInMillisecs = 0;
 
 			// Load robots.txt
 			if (CrawlContext.CrawlConfiguration.IsRespectRobotsDotTextEnabled)
@@ -128,7 +131,7 @@ namespace Abot.Crawler
 					FireRobotsDotTextParseCompleted(RobotsDotText.Robots);
 
 					robotsDotTextCrawlDelayInSecs = RobotsDotText.GetCrawlDelay(CrawlContext.CrawlConfiguration.RobotsDotTextUserAgentString);
-					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * MillisecondTranslation;
+					robotsDotTextCrawlDelayInMillisecs = TimeConverter.SecondsToMilliseconds(robotsDotTextCrawlDelayInSecs);
 				}
 				else
 				{
@@ -149,7 +152,7 @@ namespace Abot.Crawler
 									  CrawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds);
 
 					robotsDotTextCrawlDelayInSecs = CrawlContext.CrawlConfiguration.MaxRobotsDotTextCrawlDelayInSeconds;
-					robotsDotTextCrawlDelayInMillisecs = robotsDotTextCrawlDelayInSecs * MillisecondTranslation;
+					robotsDotTextCrawlDelayInMillisecs = TimeConverter.SecondsToMilliseconds(robotsDotTextCrawlDelayInSecs);
 				}
 
 				Logger.WarnFormat("[{0}] robot.txt file directive [Crawl-delay: {1}] will be respected.",
@@ -245,9 +248,9 @@ namespace Abot.Crawler
 				return;
 
 			//Fire each subscribers delegate async
-			foreach (var subscriber in threadSafeEvent.GetInvocationList().Select(x => (EventHandler<RobotsDotTextParseCompletedArgs>)x))
+			foreach (var subscriber in threadSafeEvent.GetInvocationList().Select(x => (EventHandler<RobotsDotTextParseCompletedEventArgs>)x))
 			{
-				subscriber.BeginInvoke(this, new RobotsDotTextParseCompletedArgs(CrawlContext, robots), null, null);
+				subscriber.BeginInvoke(this, new RobotsDotTextParseCompletedEventArgs(CrawlContext, robots), null, null);
 			}
 		}
 
@@ -262,7 +265,7 @@ namespace Abot.Crawler
 				if (RobotsDotTextParseCompleted == null)
 					return;
 
-				RobotsDotTextParseCompleted.Invoke(this, new RobotsDotTextParseCompletedArgs(CrawlContext, robots));
+				RobotsDotTextParseCompleted.Invoke(this, new RobotsDotTextParseCompletedEventArgs(CrawlContext, robots));
 			}
 			catch (Exception e)
 			{
@@ -278,12 +281,12 @@ namespace Abot.Crawler
 		/// <summary>
 		/// Event occur after robots txt is parsed asynchroniously
 		/// </summary>
-		public event EventHandler<RobotsDotTextParseCompletedArgs> RobotsDotTextParseCompletedAsync;
+		public event EventHandler<RobotsDotTextParseCompletedEventArgs> RobotsDotTextParseCompletedAsync;
 
 		/// <summary>
 		/// Event occur after robots txt is parsed synchroniously
 		/// </summary>
-		public event EventHandler<RobotsDotTextParseCompletedArgs> RobotsDotTextParseCompleted;
+		public event EventHandler<RobotsDotTextParseCompletedEventArgs> RobotsDotTextParseCompleted;
 
 		#endregion
 	}
