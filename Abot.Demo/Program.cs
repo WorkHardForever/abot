@@ -14,7 +14,8 @@ namespace Abot.Demo
 
             PrintDisclaimer();
 
-            Uri uriToCrawl = GetSiteToCrawl(args);
+			//Uri uriToCrawl = GetSiteToCrawl(args);
+	        Uri uriToCrawl = new Uri("https://github.com");
 
 			IWebCrawler crawler;
 
