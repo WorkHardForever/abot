@@ -94,6 +94,9 @@ namespace Abot.Poco
 
 		#endregion
 
+		/// <summary>
+		/// Dispose
+		/// </summary>
 	    public void Dispose()
 	    {
 	        Scheduler?.Dispose();

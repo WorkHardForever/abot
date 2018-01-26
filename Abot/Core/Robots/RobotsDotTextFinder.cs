@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Abot.Core.Requests;
 using Abot.Poco;
 using log4net;
 

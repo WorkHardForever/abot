@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 using System.Timers;
 using Abot.Core;
 using Abot.Core.Config;
+using Abot.Core.Decisions;
 using Abot.Core.Parsers;
 using Abot.Core.Repositories;
+using Abot.Core.Requests;
 using Abot.Crawler.EventArgs;
 using Abot.Crawler.Interfaces;
 using Abot.Poco;
-using Abot.Util;
-using Abot.Util.Threads;
-using Abot.Util.Time;
+using Abot.Utils;
+using Abot.Utils.Memory;
+using Abot.Utils.Threads;
+using Abot.Utils.Time;
 using CefSharp.Internals;
 using log4net;
 using Timer = System.Timers.Timer;
@@ -135,11 +138,7 @@ namespace Abot.Crawler
 			IHyperLinkParser hyperLinkParser = null,
 			IMemoryManager memoryManager = null)
 		{
-			// If crawl configuration wasn't implemented, that try
-			// to take it from app config or get default
-			CrawlConfiguration config = crawlConfiguration ??
-										GetCrawlConfigurationFromConfigFile() ??
-										GenerateDefaultCrawlConfiguration();
+			CrawlConfiguration config = SetConfig(crawlConfiguration);
 
 			// Context with full settings which will used for crawling
 			CrawlContext = new CrawlContext
@@ -151,10 +150,10 @@ namespace Abot.Crawler
 
 			// Set default if custom is null
 			CrawlDecisionMaker = crawlDecisionMaker ?? new CrawlDecisionMaker();
-			PageRequester = pageRequester ?? new PageRequester(CrawlContext.CrawlConfiguration);
-			HyperLinkParser = hyperLinkParser ?? new HapHyperLinkParser(CrawlContext.CrawlConfiguration, null);
+			PageRequester = pageRequester ?? new PageRequester(config);
+			HyperLinkParser = hyperLinkParser ?? new HapHyperLinkParser(config, null);
 
-			// TODO this is bad, because if "memoryManager" is not null, so ... what to do?
+			// TODO: this is bad, because if "memoryManager" is not null, so ... what to do?
 			if (IsPayAttention(config.MaxMemoryUsageInMb) ||
 				IsPayAttention(config.MinAvailableMemoryRequiredInMb))
 			{
@@ -367,6 +366,20 @@ namespace Abot.Crawler
 		#endregion
 
 		#region Protected Methods
+
+		/// <summary>
+		/// Generate config if needed
+		/// </summary>
+		/// <param name="crawlConfiguration"></param>
+		/// <returns></returns>
+		protected CrawlConfiguration SetConfig(CrawlConfiguration crawlConfiguration)
+		{
+			// If crawl configuration wasn't implemented, that try
+			// to take it from app config or get default
+			return crawlConfiguration ??
+			       GetCrawlConfigurationFromConfigFile() ??
+			       GenerateDefaultCrawlConfiguration();
+		}
 
 		/// <summary>
 		/// Incapsulate main logic of crawling

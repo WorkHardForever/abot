@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Abot.Core;
+using Abot.Core.Decisions;
+using Abot.Core.Limiters;
 using Abot.Core.Repositories;
+using Abot.Core.Requests;
 using Abot.Core.Robots;
 using Abot.Core.Sitemap;
 using Abot.Crawler.Interfaces;
 using Abot.Poco;
-using Abot.Util;
+using Abot.Utils;
+using Abot.Utils.Memory;
 using CefSharp;
 using CefSharp.OffScreen;
 using Louw.SitemapParser;
@@ -66,7 +71,7 @@ namespace Abot.Crawler
 			IDomainRateLimiter domainRateLimiter = null,
 			IRobotsDotTextFinder robotsDotTextFinder = null,
 			IRobotsSitemapLoader sitemapLoader = null)
-			: base(crawlConfiguration, crawlDecisionMaker, threadManager, scheduler, pageRequester, hyperLinkParser, memoryManager, domainRateLimiter, robotsDotTextFinder)
+			: base(SetConfig(crawlConfiguration), crawlDecisionMaker, threadManager, scheduler, pageRequester ?? new BrowserPageRequester(crawlConfiguration), hyperLinkParser, memoryManager, domainRateLimiter, robotsDotTextFinder)
 		{
 			SitemapLoader = sitemapLoader ?? new RobotsSitemapLoader();
 		}
@@ -74,7 +79,8 @@ namespace Abot.Crawler
 		#endregion
 
 		#region Public Override Method
-		protected static ChromiumWebBrowser browser;
+		//protected static ChromiumWebBrowser Browser;
+		//protected static Semaphore SemaphoreObj = new Semaphore(0, 1);
 
 		/// <summary>
 		/// Begins a synchronous crawl using the uri param,
@@ -85,12 +91,13 @@ namespace Abot.Crawler
 		/// <returns></returns>
 		public override CrawlResult Crawl(Uri uri, CancellationTokenSource cancellationTokenSource)
 		{
+			// NOTIFY: Can be large heap object
 			CrawlResult result;
 			
 			var settings = new CefSettings()
 			{
 				//By default CefSharp will use an in-memory cache, you need to specify a Cache Folder to persist data
-				CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache")
+				CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache")				
 			};
 
 			//Perform dependency check to make sure all relevant resources are in our output directory.
@@ -99,12 +106,18 @@ namespace Abot.Crawler
 			string testUrl = "https://www.google.com/";
 			// Create the offscreen Chromium browser.
 			//ChromiumWebBrowser browser = new ChromiumWebBrowser();
-			browser = new ChromiumWebBrowser(testUrl);
 
-			//browser.Load(testUrl);
+			// Initialize browser and wait its start loading
+			//Browser = new ChromiumWebBrowser();
+			//Browser.BrowserInitialized += IsBrowserLoaded;
+			// await Logic
+			//SemaphoreObj.WaitOne();
+
+			//Browser.Load(testUrl);
+			//Browser.Load("https://content.next.westlaw.com/");
 
 			// Test screenshot
-			browser.LoadingStateChanged += BrowserLoadingStateChanged;
+			//Browser.LoadingStateChanged += BrowserLoadingStateChanged;
 
 			// Try find robots.txt
 			if (TryLoadRobotsTxt(uri) && TryParseRobotsSitemaps())
@@ -126,13 +139,22 @@ namespace Abot.Crawler
 			Logger.InfoFormat("*** Crawl site through getting Uri ***");
 			result = base.Crawl(uri, cancellationTokenSource);
 
-			Thread.Sleep(10000);
+			Thread.Sleep(100000);
 			// Clean up Chromium objects.  You need to call this in your application otherwise
 			// you will get a crash when closing.
 			Cef.Shutdown();
 
 			return result;
 		}
+
+		//protected void IsBrowserLoaded(object sender, System.EventArgs e)
+		//{
+		//	// No need more calls
+		//	Browser.BrowserInitialized -= IsBrowserLoaded;
+
+		//	// Continue main thread
+		//	SemaphoreObj.Release();
+		//}
 
 		protected virtual /*async Task<*/IEnumerable<CrawlResult>/*>*/ GetSitemapResults(IRobotsSitemap sitemap, CancellationTokenSource cancellationTokenSource)
 		{
@@ -249,51 +271,51 @@ namespace Abot.Crawler
 		//	Cef.Shutdown();
 		//}
 
-		private static void BrowserLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
-		{
-			// Check to see if loading is complete - this event is called twice, one when loading starts
-			// second time when it's finished
-			// (rather than an iframe within the main frame).
-			if (!e.IsLoading)
-			{
-				// Remove the load event handler, because we only want one snapshot of the initial page.
-				browser.LoadingStateChanged -= BrowserLoadingStateChanged;
+		//private static void BrowserLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+		//{
+		//	// Check to see if loading is complete - this event is called twice, one when loading starts
+		//	// second time when it's finished
+		//	// (rather than an iframe within the main frame).
+		//	if (!e.IsLoading)
+		//	{
+		//		// Remove the load event handler, because we only want one snapshot of the initial page.
+		//		Browser.LoadingStateChanged -= BrowserLoadingStateChanged;
 
-				var scriptTask = browser.EvaluateScriptAsync("document.getElementById('lst-ib').value = 'CefSharp Was Here!'");
+		//		var scriptTask = Task.Run(() => { return; });//Browser.EvaluateScriptAsync("document.getElementById('lst-ib').value = 'CefSharp Was Here!'"))'");
 
-				scriptTask.ContinueWith(t =>
-				{
-					//Give the browser a little time to render
-					Thread.Sleep(500);
-					// Wait for the screenshot to be taken.
+		//		scriptTask.ContinueWith(t =>
+		//		{
+		//			//Give the browser a little time to render
+		//			Thread.Sleep(10000);
+		//			// Wait for the screenshot to be taken.
 
-					var task = browser.ScreenshotAsync();
-					task.ContinueWith(x =>
-					{
-						// Make a file to save it to (e.g. C:\Users\jan\Desktop\CefSharp screenshot.png)
-						var screenshotPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CefSharp screenshot.png");
+		//			var task = Browser.ScreenshotAsync();
+		//			task.ContinueWith(x =>
+		//			{
+		//				// Make a file to save it to (e.g. C:\Users\jan\Desktop\CefSharp screenshot.png)
+		//				var screenshotPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CefSharp screenshot.png");
 
-						Console.WriteLine();
-						Console.WriteLine("Screenshot ready. Saving to {0}", screenshotPath);
+		//				Console.WriteLine();
+		//				Console.WriteLine("Screenshot ready. Saving to {0}", screenshotPath);
 
-						// Save the Bitmap to the path.
-						// The image type is auto-detected via the ".png" extension.
-						task.Result.Save(screenshotPath);
+		//				// Save the Bitmap to the path.
+		//				// The image type is auto-detected via the ".png" extension.
+		//				task.Result.Save(screenshotPath);
 
-						// We no longer need the Bitmap.
-						// Dispose it to avoid keeping the memory alive.  Especially important in 32-bit applications.
-						task.Result.Dispose();
+		//				// We no longer need the Bitmap.
+		//				// Dispose it to avoid keeping the memory alive.  Especially important in 32-bit applications.
+		//				task.Result.Dispose();
 
-						Console.WriteLine("Screenshot saved.  Launching your default image viewer...");
+		//				Console.WriteLine("Screenshot saved.  Launching your default image viewer...");
 
-						// Tell Windows to launch the saved image.
-						//Process.Start(screenshotPath);
+		//				// Tell Windows to launch the saved image.
+		//				Process.Start(screenshotPath);
 
-						Console.WriteLine("Image viewer launched.  Press any key to exit.");
-					}, TaskScheduler.Default);
-				});
-			}
-		}
+		//				Console.WriteLine("Image viewer launched.  Press any key to exit.");
+		//			});
+		//		});
+		//	}
+		//}
 
 		#endregion
 	}

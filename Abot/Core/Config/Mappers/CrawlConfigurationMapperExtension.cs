@@ -2,10 +2,18 @@
 
 namespace Abot.Core.Config.Mappers
 {
+	/// <summary>
+	/// Simple mapping
+	/// </summary>
 	public static class CrawlConfigurationMapperExtension
 	{
 		#region Extension Methods
 
+		/// <summary>
+		/// Map Behavior element to config
+		/// </summary>
+		/// <param name="destination"></param>
+		/// <param name="source"></param>
 		public static void ImportCrawlBehaviorElement(this CrawlConfiguration destination, CrawlBehaviorElement source)
 		{
 			destination.MaxConcurrentThreads = source.MaxConcurrentThreads;
@@ -36,6 +44,11 @@ namespace Abot.Core.Config.Mappers
 			destination.MinRetryDelayInMilliseconds = source.MinRetryDelayInMilliseconds;
 		}
 
+		/// <summary>
+		/// Map Politeness element to config
+		/// </summary>
+		/// <param name="destination"></param>
+		/// <param name="source"></param>
 		public static void ImportPolitenessElement(this CrawlConfiguration destination, PolitenessElement source)
 		{
 			destination.IsRespectRobotsDotTextEnabled = source.IsRespectRobotsDotTextEnabled;
@@ -48,6 +61,11 @@ namespace Abot.Core.Config.Mappers
 			destination.MaxRobotsDotTextCrawlDelayInSeconds = source.MaxRobotsDotTextCrawlDelayInSeconds;
 		}
 
+		/// <summary>
+		/// Map Authorization element to config
+		/// </summary>
+		/// <param name="destination"></param>
+		/// <param name="source"></param>
 		public static void ImportAuthorizationElement(this CrawlConfiguration destination, AuthorizationElement source)
 		{
 			destination.IsAlwaysLogin = source.IsAlwaysLogin;
@@ -55,6 +73,11 @@ namespace Abot.Core.Config.Mappers
 			destination.LoginPassword = source.LoginPassword;
 		}
 
+		/// <summary>
+		/// Map Extension Value element to config
+		/// </summary>
+		/// <param name="destination"></param>
+		/// <param name="source"></param>
 		public static void ImportExtensionValueCollection(this CrawlConfiguration destination, ExtensionValueCollection source)
 		{
 			foreach (ExtensionValueElement element in source)

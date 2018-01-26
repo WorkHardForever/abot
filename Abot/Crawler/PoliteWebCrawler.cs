@@ -4,13 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Abot.Core;
+using Abot.Core.Decisions;
+using Abot.Core.Limiters;
 using Abot.Core.Repositories;
+using Abot.Core.Requests;
 using Abot.Core.Robots;
 using Abot.Crawler.EventArgs;
 using Abot.Crawler.Interfaces;
 using Abot.Poco;
-using Abot.Util;
-using Abot.Util.Time;
+using Abot.Utils;
+using Abot.Utils.Memory;
+using Abot.Utils.Time;
 using Robots;
 
 namespace Abot.Crawler
